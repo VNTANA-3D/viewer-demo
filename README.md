@@ -1,4 +1,4 @@
-# VNTANA Viewer Interface #
+# VNTANA Viewer Demo
 
 - [Basic usage](#basic-usage)
 - [Attributes and properties](#attributes-and-properties)
