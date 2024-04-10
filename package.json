@@ -1,0 +1,15 @@
+{
+  "name": "vntana-viewer-demo",
+  "version": "1.0.0",
+  "description": "VNTANA Viewer Demo",
+  "main": "index.js",
+  "scripts": {
+    "simple": "npx http-server -o simple/index.html",
+    "integration": "npx http-server -o integration/index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "VNTANA",
+  "license": "ISC",
+  "private": true,
+  "type": "module"
+}

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="icon" href="data:;base64,iVBORwOKGO=" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="../shared/viewer.css" />
+    <link rel="stylesheet" href="../shared/style.css" />
+  </head>
+
+  <body>
+    <script type="module" src="../shared/viewer.min.js"></script>
+
+    <vntana-viewer>
+      <vntana-fs-button></vntana-fs-button>
+      <vntana-qr-button class="expandable"></vntana-qr-button>
+      <vntana-ar-button></vntana-ar-button>
+      <vntana-center-button></vntana-center-button>
+      <div class="button-container zoom-buttons">
+        <vntana-zoom-in-button></vntana-zoom-in-button>
+        <vntana-zoom-out-button></vntana-zoom-out-button>
+      </div>
+    </vntana-viewer>
+
+    <script type="module">
+      import {getPlatformData} from './platform.js';
+      import {normalize} from '../shared/viewer.min.js';
+
+      const platformData = await getPlatformData(
+        "asset-library",
+        "furniture",
+        "85a51c7b-07c1-4143-bd56-aa2a43acaa42"
+      );
+      platformData.config = normalize(platformData.config);
+
+      const config = {
+        src: platformData.src,
+        usdzSrc: platformData.usdzSrc,
+        poster: platformData.poster,
+        ...platformData.config,
+      };
+
+      const viewer = document.querySelector("vntana-viewer");
+
+      for (const [key, value] of Object.entries(config)) {
+        viewer[key] = value; 
+      }
+
+      const qrButton = viewer.querySelector("vntana-qr-button");
+      qrButton.url = platformData.qrUrl;
+    </script>
+  </body>
+</html>
