@@ -47,14 +47,14 @@ A simple example demonstrating basic usage of the viewer is as follows. If we wa
 The viewer element is a custom HTML element, and can thus be manipulated, styled, and placed anywhere in the DOM just as a regular element would be. If no attributes are specified, the viewer acts as an empty element. Note that although the viewer doesn’t have any children in this example, the closing tag is still mandatory.
 
 ## Attributes and properties
-The viewer can be manipulated either by setting and removing attributes in HTML or JavaScript, or directly through its properties. All attributes are passed as strings except boolean attributes, for which it suffices to set or remove the attribute to indicate their state. For example, if we wanted to set shadow intensity to 0.3 and enable auto-rotation of the camera, we would use the following code:
+The viewer can be manipulated either by setting and removing attributes in HTML or JavaScript, or directly through its properties. All attributes are passed as strings except boolean attributes, for which it suffices to set or remove the attribute to indicate their state. For example, if we wanted to set shadow intensity to `0.3` and enable auto-rotation of the camera, we would use the following code:
 ```html
-<vntana-viewer shadow-intensity="0.3" enable-auto-rotate ...></vntana-viewer>
+<vntana-viewer shadow-intensity="0.3" enable-auto-rotate></vntana-viewer>
 ```
-Removing the attribute or passing invalid values is equivalent to resetting its value to default. Continuing with the example above, removing the `shadow-intensity` attribute will reset its value to default value of 0, and removing the `enable-auto-rotate` attribute will set its value to false. If we were to set the `shadow-intensity` value to “something" it would also be reset to 0, 
-and setting it to an out-of-bounds value like 50 would result in the value being clamped to 1.
+Removing the attribute or passing invalid values is equivalent to resetting its value to default. Continuing with the example above, removing the `shadow-intensity` attribute will reset its value to default value of `0`, and removing the `enable-auto-rotate` attribute will set its value to `false`. If we were to set the `shadow-intensity` value to `“something"` it would also be reset to `0`, 
+and setting it to an out-of-bounds value like `50` would result in the value being clamped to `1`.
 
-The property interface is more appropriate if viewer parameters will change during the component’s lifetime. Unlike their corresponding attributes, property values are not kept as strings (strings will automatically be parsed if needed) and are automatically converted to basic types. The attribute values are automatically reflected in property values and converted, but the converse doesn’t hold - changing property values won’t change the attributes. For example, when we set `shadow-intensity` to 0.3 in the previous example, the viewer’s `shadowIntensity` property was immediately set to 0.3.
+The property interface is more appropriate if viewer parameters will change during the component’s lifetime. Unlike their corresponding attributes, property values are not kept as strings (strings will automatically be parsed if needed) and are automatically converted to basic types. The attribute values are automatically reflected in property values and converted, but the converse doesn’t hold - changing property values won’t change the attributes. For example, when we set `shadow-intensity` to `0.3` in the previous example, the viewer’s `shadowIntensity` property was immediately set to `0.3`.
 
 ```html
 <vntana-viewer></vntana-viewer>
@@ -69,7 +69,7 @@ Property value types can be generally classified into the following categories:
 
 **strings**  Falsy values are converted to empty string, to everything else the call to `String()` is first applied.
 
-**booleans**   All strings are converted to true, to everything else the call to `Boolean()` is applied first.
+**booleans**   All strings are converted to `true`, to everything else the call to `Boolean()` is applied first.
 
 **colors**   Can be specified as a # followed by a six-digit hex code or an equivalent number. Always stored in hex code format.
 
@@ -241,7 +241,7 @@ Each light configuration object may contain the following properties:
   - default: `0`
 
 - **angle**
-    Maximum angle of light dispersion from its direction axis. Values must be between 0 and `90deg`. Only applied to spot lights.           
+    Maximum angle of light dispersion from its direction axis. Values must be between `0deg` and `90deg`. Only applied to spot lights.           
 
   - type: string
   - default: `60deg`
@@ -262,7 +262,7 @@ Sets the exposure level of the tone mapping. Non-negative values are accepted.
 
 **tone-mapping**
 
-Sets the tone mapping type. Accepted values are “none”, “linear”, “reinhard”, “cineon”, “aces”, “agx”, and “neutral”.
+Sets the tone mapping type. Accepted values are `“none”`, `“linear”`, `“reinhard”`, `“cineon”`, `“aces”`, `“agx”`, and `“neutral”`.
 
   - type: string
   - default: `"aces"`
@@ -271,8 +271,8 @@ Sets the tone mapping type. Accepted values are “none”, “linear”, “rei
 
 Sets the anti-aliasing method. Available options are “ssaa” and “msaa”.  
 
-    - type: string
-    - default: `"ssaa"`
+  - type: string
+  - default: `"ssaa"`
 
 **msaa-samples**
 
@@ -360,7 +360,7 @@ Sets the contrast factor of the rendered image. Values are numbers between 0 and
 
 **transparency-mode**
 
-Transparency mode used when rendering transparent objects. Available values are “normal” and “depth-write”. If set to "depth-write", transparent meshes will use the depth buffer when being rendered. This may improve the render quality of transparent meshes. 
+Transparency mode used when rendering transparent objects. Available values are `“normal”` and `“depth-write”`. If set to `"depth-write"`, transparent meshes will use the depth buffer when being rendered. This may improve the render quality of transparent meshes. 
 
   - type: string
   - default: `"normal"`
@@ -375,7 +375,7 @@ The URL of the poster image that will be displayed before the model is loaded.
 
 **loading**
 
-Determines when the model and environment map start loading. Available options are “lazy”, “eager”, and “hover”. "eager" starts loading as soon as possible, "lazy" when element is near the viewport, and "hover" when the pointer enters the element.
+Determines when the model and environment map start loading. Available options are `"lazy"`, `"eager"`, and `"hover"`. `"eager"` starts loading as soon as possible, `"lazy"` when element is near the viewport, and `"hover"` when the pointer enters the element.
 
   - type: string
   - default: `"lazy"`
@@ -580,11 +580,13 @@ Directory simple contains the `index.html` containing the page's HTML code, the 
     </vntana-viewer>
   </body>
 
-Line 2 loads the ES module containing the viewer. Line 4 adds the viewer elements, sets the model through the `src` attribute and environment through `environment-src`. We also added the `tone-mapping` attribute to improve the lighting experience. `<vntana-fs-button>` is added as a child of the viewer, and toggles the viewer’s fullscreen state when clicked.
+Line `2` loads the ES module containing the viewer. Line `4` adds the viewer elements, sets the model through the `src` attribute and environment through `environment-src`. We also added the `tone-mapping` attribute to improve the lighting experience. `<vntana-fs-button>` is added as a child of the viewer, and toggles the viewer’s fullscreen state when clicked.
 
 ### Integration Example
 
 Directory `integration` contains two files: `index.html` with HTML code for the page, and `platform.js` containing the function `getPlatformData`, which we will use to fetch the product data from VNTANA Platform.
+
+**NOTE**: Function `getPlatformData` only works with products in Live Product state.
 
 The first part of the page’s body loads the viewer with different buttons:
 ```html
@@ -612,7 +614,7 @@ Second part of the body handles the main purpose of this demo - loading the data
       "furniture",
       "85a51c7b-07c1-4143-bd56-aa2a43acaa42"
     );
-     platformData.config = normalize(platformData.config);
+    platformData.config = normalize(platformData.config);
 
     const config = {
       src: platformData.src,
@@ -646,4 +648,4 @@ The function returns an object with the following properties:
 - `qrUrl` - URL of the product’s embed link with autoAR enabled,
 - `config` - config data for the viewer without links.
 
-The `qrUrl` should in almost all cases be replaced with a different URL for custom integrations. After obtaining the platform data in lines 5-9, we call the `normalize` function on the config obtained from `getPlatformData` in link 10. In lines 12-17 we merge all the data into one config containing a list of `(key,value)` pairs that will be passed to the viewer. In line 19 we obtain a reference to the viewer, and pass it these pairs in lines 21-23. We obtaine the reference to the `<vntana-qr-button>` in line 25, and pass it the qrUrl string.
+The `qrUrl` should in almost all cases be replaced with a different URL for custom integrations. After obtaining the platform data in lines `5-9`, we call the `normalize` function on the config obtained from `getPlatformData` in line `10`. In lines `12-17` we merge all the data into one config containing a list of `(key,value)` pairs that will be passed to the viewer. In line `19` we obtain a reference to the viewer, and pass it these pairs in lines `21-23`. We obtain the reference to the `<vntana-qr-button>` in line `25`, and pass it the `qrUrl` string.
