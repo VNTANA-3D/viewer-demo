@@ -572,6 +572,7 @@ Both examples utilize the content of the shared directory:
 
 Directory simple contains the `index.html` containing the page's HTML code, the `chair.glb` model, and `Neutral.hdr` environment map. The body of the document is:
 
+```html
   <body>
     <script type="module" src="../shared/viewer.min.js"></script>
 
@@ -579,6 +580,7 @@ Directory simple contains the `index.html` containing the page's HTML code, the 
       <vntana-fs-button></vntana-fs-button>
     </vntana-viewer>
   </body>
+```
 
 Line `2` loads the ES module containing the viewer. Line `4` adds the viewer elements, sets the model through the `src` attribute and environment through `environment-src`. We also added the `tone-mapping` attribute to improve the lighting experience. `<vntana-fs-button>` is added as a child of the viewer, and toggles the viewer’s fullscreen state when clicked.
 
