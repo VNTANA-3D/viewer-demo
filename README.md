@@ -563,8 +563,6 @@ to execute `npm run simple` or `npm run integration` from the package’s root d
 
 Both examples utilize the content of the shared directory:
 
-- `viewer.min.js` - ES module containing the VNTANA Viewer code,
-- `viewer.umd.min.js` - UMD module containing the VNTANA Viewer code,
 - `style.css` - styles used for this demo,
 - `viewer.css` - default styles for the viewer and positioning of buttons.
 
@@ -574,7 +572,7 @@ Directory simple contains the `index.html` containing the page's HTML code, the 
 
 ```html
   <body>
-    <script type="module" src="../shared/viewer.min.js"></script>
+    <script type="module" src="https://viewer-build.vntana.com/v1.1.0/viewer.min.js"></script>
 
     <vntana-viewer src="chair.glb" environment-src="Neutral.hdr" tone-mapping="neutral">
       <vntana-fs-button></vntana-fs-button>
@@ -609,7 +607,7 @@ Second part of the body handles the main purpose of this demo - loading the data
 ```js
   <script type="module">
     import {getPlatformData} from './platform.js';
-    import {normalize} from '../viewer.min.js';
+    import {normalize} from "https://viewer-build.vntana.com/v1.1.0/viewer.min.js";
 
     const platformData = await getPlatformData(
       "asset-library",
