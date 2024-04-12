@@ -410,7 +410,7 @@ Enables anti-aliasing when rendering gems.
   - type: boolean
   - default: `false`
 
-**gem-raytracing-depth**
+**gem-ray-tracing-depth**
 
 The number of ray tracing steps used when rendering gems. Available values are integers between 0 and 6.
 
