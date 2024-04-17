@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="icon" href="data:;base64,iVBORwOKGO=" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="../shared/viewer.css" />
+    <link rel="stylesheet" href="../shared/style.css" />
+  </head>
+
+  <body>
+    <script type="module" src="https://viewer-build.vntana.com/v1.1.0/viewer.min.js"></script>
+
+    <vntana-viewer>
+    </vntana-viewer>
+
+    <script type="module">
+      import {Platform} from './platform.js';
+      import {normalize, VntanaViewer} from "https://viewer-build.vntana.com/v1.1.0/viewer.min.js";
+
+      const email = "<username>";
+      const password = "<password>";
+      const organizationSlug = "<organization-slug>";
+      const workspaceSlug = "<workspace-slug>";
+      const productUuid = "<product-uuid>";
+
+
+      const platform = new Platform();
+      await platform.login(email, password);
+
+      const organizations = await platform.getOrganizations();
+      const organization = organizations.find(org => org.slug === organizationSlug);
+      const {
+        role: organizationRole,
+        uuid: organizationUuid,
+      } = organization;
+
+      await platform.refreshToken(organizationUuid);
+  
+      const workspaces = await platform.getWorkspaces();
+      const workspace = workspaces.find(workspace => workspace.slug === workspaceSlug);
+      const {
+        uuid: workspaceUuid,
+      } = workspace;
+
+      if (organizationRole !== "ORGANIZATION_OWNER" && organizationRole !== "ORGANIZATION_ADMIN") {
+        await platform.refreshToken(undefined, workspace.uuid);
+      }
+
+      const product = await platform.getProduct(productUuid);
+      const viewerConfig = normalize(JSON.parse(product.viewerSettings.value));
+      const src = platform.getModelURL(workspaceUuid, productUuid);
+
+      VntanaViewer.setModelRequestHeaders(platform.getHeaders());
+
+      const config = {
+        src,
+        ...viewerConfig,
+      };
+
+      const viewer = document.querySelector("vntana-viewer");
+
+      for (const [key, value] of Object.entries(config)) {
+        viewer[key] = value; 
+      }
+    </script>
+  </body>
+</html>
