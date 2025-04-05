@@ -10,11 +10,3 @@ Triggers when the `ARMode` changes and is used to identify whether AR can be sta
 Triggered when AR is launched.
 ### exit-ar
 Triggered when returned from AR.
-### enter-fullscreen
-Triggered when the fullscreen button is clicked to open fullscreen.
-### exit-fullscreen
-Triggered when the fullscreen button is clicked while in fullscreen.
-### enter-qr-modal
-Triggered when the QR button is clicked.
-### exit-qr-modal
-Triggered when the QR modal is exited.

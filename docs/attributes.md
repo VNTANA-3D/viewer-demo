@@ -30,7 +30,8 @@ Most property value types fit into one of the following categories:
 
 - **strings** Strings are treated as-is without any modification.
 
-- **booleans** All string values are treated as `true`, while booleans are treated as-is.
+- **booleans** All string values are treated as `true`, while booleans are treated as-is. All boolean
+properties default to false.
 
 - **colors** Properties accept six-digit hex color codes (for example, `"#aabbcc"`).
 
@@ -55,7 +56,7 @@ Except for strings, multiple blanks in the specified strings are ignored.
 
 ## Property/Attribute Reference
 
-* [Scene](#scene)
+* [Model](#model)
 
 * [Controls](#controls)
 
@@ -67,63 +68,30 @@ Except for strings, multiple blanks in the specified strings are ignored.
 
 * [Loading](#loading)
 
+* [Augmented Reality](#augmented-reality)
+
 * [Utility](#utility)
 
-## Scene
-Attributes related to the scene that gets loaded. Set the GLB model to load, AR behavior, as well
- as adjust the model's scale and/or rotation.
+## Model
+Attributes related to the model that gets loaded. 
 
 ### src
 A URL to a glTF or glB model to load in the web viewer.
-#### Example
 ```
-// Script
- const viewer = document.querySelector('vntana-viewer');
- viewer.src = ./DamagedHelmet.glb;
- 
- --- or ---
- 
- <!-- HTML -->
- <vntana-viewer src='./DamagedHelmet.glb'></vntana-viewer>
+auto: ""
 ```
+
 ### scale
 Model's scaling factors in X, Y, and Z directions.
 ```
-auto: 1 1 1
+auto: "1 1 1"
 ```
 ### rotation
 Euler angles specifying rotation of the model around X, Y and Z axes. Rotations are applied
  in YXZ order, that is, the model is first rotated around Z axis, then X, then Y.
 ```
-Accepted Values: (-Infinity, Infinity)
-auto: 0deg 0deg 0deg
-```
-### autoAR (auto-ar)
-Determines whether AR should launch once the model loads. Only used if AR is available and ARMode is 
- determined to be `native`. HTML attribute form is `auto-ar`.
-#### Example
-```
-// Script
- const viewer = document.querySelector('vntana-viewer');
- viewer.autoAR = true;
- 
- --- or ---
- 
- <!-- HTML -->
- <vntana-viewer src='' auto-ar></vntana-viewer>
-```
-### usdzSrc (usdz-src)
-A URL to a USDZ model to load in AR on iOS devices. HTML attribute is `usdz-src`.
-#### Example
-```
-// Script
- const viewer = document.querySelector('vntana-viewer');
- viewer.usdzSrc = ./DamagedHelmet.usdz;
- 
- --- or ---
- 
- <!-- HTML -->
- <vntana-viewer src='' usdz-src='./DamagedHelmet.usdz'></vntana-viewer>
+Accepted Values: (-Infinity, Infinity) (-Infinity, Infinity) (-Infinity, Infinity)
+auto: "0deg 0deg 0deg"
 ```
 [Back to Top](#attributes-reference)
 ## Controls
@@ -133,13 +101,13 @@ Attributes to control the camera. Includes the ability to restrict certain camer
  are not storing the current values when interacting with the camera.
 
 ### disableZoom (disable-zoom)
-Disables camera zoom. Default `false`.
+Disables camera zoom through pointer events.
 ### disablePan (disable-pan)
-Disables camera panning. Default `false`.
+Disables camera panning through pointer events.
 ### disableRotation (disable-rotation)
-Diables camera rotation. Default `false`.
+Diables camera rotation through pointer events.
 ### disableControls (disable-controls)
-Disables camera controls in general, including panning and zoom. Default `false`.
+Disables camera controls in general.
 ### rotationSensitivity (rotation-sensitivity)
 How responsive the camera rotation is when the user engages rotation input. Higher sensitivity
  would result in quicker rotation. Does not impact autoRotate settings.
@@ -169,7 +137,7 @@ Enables automatic rotation of camera. Use `autoRotateSpeed` and `autoRotateDelay
 Angle traversed in one second of auto-rotate mode.
 ```
 Accepted Values: (-Infinity, Infinity)
-auto: 15deg
+auto: "15deg"
 ```
 ### autoRotateDelay (auto-rotate-delay)
 Number of seconds without user interaction after which the auto-rotating starts.
@@ -180,57 +148,75 @@ auto: 5
 ### minFieldOfView (min-field-of-view)
 The minimum value (degrees or radians) the Field of View will be clamped to. Only for Perspective Camera
 ```
-Accepted Values: [0, 180]
-auto: 18deg
+Accepted Values: [0deg, 180deg]
+auto: "18deg"
 ```
 ### maxFieldOfView (max-field-of-view)
 The maximum value (degrees or radians) the Field of View will be clamped to. Only for Perspective Camera
 ```
-Accepted Values: [0, 180]
-auto: 45deg
+Accepted Values: [0deg, 180deg]
+auto: "45deg"
 ```
 ### fieldOfView (field-of-view)
-Vertical FoV. Values in degrees `deg` or radians `rad`. Determines how much of the scene is visible in the camera's view. While distance remains the same, 
- changing FoV will result in larger/smaller objects in the scene as more or less area becomes visible. Used as is for Perspective camera,
- or used to calculate `orthographicSize` for Orthographic camera. Default is "45deg".
+Vertical field of view. Determines how much of the scene is visible in the camera's view. While distance remains the same, 
+ changing field of view will result in larger/smaller objects in the scene as more or less area becomes visible. Used as is for Perspective camera.
 ```
-Accepted Values: [0, 180]
-auto: 45deg
+Accepted Values: [0deg, 180deg]
+auto: "45deg"
 ```
 ### minCameraDistance (min-camera-distance)
-The minimum distance to clamp the camera to. Non-negative values accepted.
+The minimum distance to clamp the camera to.
 ```
-auto: 2r
+Accepted Values: [0m, Infinity)
+auto: "2r"
 ```
 ### maxCameraDistance (max-camera-distance)
 The maximum distance to clamp the camera to. Default is calculated as a scaling factor of radius using the default
- field of view (`45deg`). Non-negative values accepted.
+ field of view (`45deg`). 
+```
+Accepted Values: [0m, Infinity)
+```
+
 ### cameraDistance (camera-distance)
 Distance to the target from the camera. Default is calculated as a scaling factor of radius using the default
- field of view (`45deg`). Non-negative values accepted.
+ field of view (`45deg`). 
+```
+Accepted Values: [0m, Infinity)
+```
 ### minOrthographicSize (min-orthographic-size)
 The minimum value the Orthographic camera frustum can have. Default is calculated 
- using default minimum FoV and default minimum `cameraDistance`, in meters. Non-negative values accepted.
+ using default minimum FoV and default minimum `cameraDistance`, in meters.
+```
+Accepted Values: [0m, Infinity)
+```
+
 ### maxOrthographicSize (max-orthographic-size)
 The maximum value the Orthographic camera frustum can have. Default is calculated 
- using default FoV and default `cameraDistance`, in meters. Non-negative values accepted.
+ using default FoV and default `cameraDistance`, in meters. 
+```
+Accepted Values: [0m, Infinity)
+```
+
 ### orthographicSize (orthographic-size)
 Size of the camera frustum for Orthographic Camera. A smaller value makes the model appear
  bigger or closer to the camera. Default calculated based on default `fieldOfView` and `cameraDistance`, in meters. 
- Non-negative values accepted.
-### minCameraRotation (min-camera-rotation)
-Clamps minimum rotation angles for pitch, yaw, roll. Default value "90deg -Infinity 0deg" where `-Infinity`
- means unbounded. Each rotation angle has its own `domain` defining allowable values, however `roll` cannot be set and must be `0<units>`.
 ```
-Accepted Values: [-90, 90] (-Infinity, Infinity) [0 0]
-auto: -90deg -Infinity 0deg
+Accepted Values: [0m, Infinity)
+```
+
+### minCameraRotation (min-camera-rotation)
+Clamps minimum rotation angles for pitch, yaw, roll. 
+Each rotation angle has its own domain defining allowable values, however `roll` cannot be set and must be `0<units>`.
+```
+Accepted Values: [-90deg, 90deg] (-Infinity, Infinity) [0 0]
+auto: "-90deg -Infinity 0deg"
 ```
 ### maxCameraRotation (max-camera-rotation)
-Clamps maximum rotation angles for pitch, yaw, roll. Default value "90deg +Infinity 0deg" where `+Infinity` 
- means unbounded. Each rotation angle has its own `domain` defining allowable values, however `roll` cannot be set and must be `0<units>`.
+Clamps maximum rotation angles for pitch, yaw, roll. 
+ Each rotation angle has its own domain defining allowable values, however `roll` cannot be set and must be `0<units>`.
 ```
-Accepted Values: [-90, 90] (-Infinity, Infinity) [0 0]
-auto: 90deg +Infinity 0deg
+Accepted Values: [-90deg, 90deg] (-Infinity, Infinity) [0 0]
+auto: "90deg +Infinity 0deg"
 ```
 ### cameraRotation (camera-rotation)
 The initial Euler angles of the camera upon load. Value is a string representing the three rotations to make: rotation
@@ -239,8 +225,8 @@ The initial Euler angles of the camera upon load. Value is a string representing
  Units are in degrees or radians. Default "-15deg 0deg 0deg". Each rotation angle has its own `domain` defining allowable values. 
  This is the rotation reset to when the center button is clicked.
 ```
-Accepted Values: [-90, 90] (-Infinity, Infinity) [0 0]
-auto: -15deg 0deg 0deg
+Accepted Values: [-90deg, 90deg] (-Infinity, Infinity) [0 0]
+auto: "-15deg 0deg 0deg"
 ```
 #### Example
 ```
@@ -252,9 +238,11 @@ auto: -15deg 0deg 0deg
  <vntana-viewer camera-rotation="0deg 30deg 0deg"></vntana-viewer>
 ```
 ### cameraTarget (camera-target)
-Starting point around which the camera rotates. Default is center of model's bounding box.
+Coordinates of the initial point around which the camera rotates. Coordinates are specified
+relative to model's bounding box.
 ```
-auto: 0m 0m 0m
+Accepted Values: (-Infinity, Infinity) (-Infinity, Infinity) (-Infinity, Infinity)
+auto: "0m 0m 0m"
 ```
 ### cameraType (camera-type)
 Indicates which type of camera to employ: `perspective` (default) or `orthographic`.
@@ -263,17 +251,19 @@ Accepted Values: perspective, orthographic
 auto: perspective
 ```
 ### cameraAspect (camera-aspect)
-Aspect ratio based on the current type of camera. Setting to `null` will calculate this value.
+Aspect ratio based on the current type of camera. Default values is computed so that
+model fits the screen from all possible rotation angles, if possible.
+
 ```
 Accepted Values: [0, Infinity)
 ```
 [Back to Top](#attributes-reference)
 ## Rendering
 Attributes available to control the scene rendering. Exposes various post-processing effects such as anti-aliasing, 
- ssao, and tone mapping.
+ SSAO, and tone mapping.
 
 ### exposure
-Controls the level of exposure for tone mapping, affecting the perceived brightness of the scene. Default 1.
+Controls the level of exposure for tone mapping, affecting the perceived brightness of the scene.
 ```
 Accepted Values: [0, Infinity)
 auto: 1
@@ -286,81 +276,85 @@ Accepted Values: none, linear, reinhard, cineon, aces, agx, neutral
 auto: aces
 ```
 ### antiAliasing (anti-aliasing)
-Sets the method for anti-aliasing from ssaa or msaa. Default is ssaa.
+Sets the method for anti-aliasing to SSAA or MSAA.
 ```
 Accepted Values: ssaa, msaa
 auto: ssaa
 ```
 ### msaaSamples (msaa-samples)
-The number of samples used for MSAA. Default value is 8.
-Property domain is an `Integer Interval`, passing non-integer values will result in their discarding and the defaults set.
+The number of samples used for MSAA. Accepted values are integers in the specified range.
 ```
 Accepted Values: [1, 8]
 auto: 8
 ```
 ### ssaaSamples (ssaa-samples)
-The logarithm of SSAA samples. Default value is 0.
+The number of SSAA samples. Accepted values are power-of-two values in the specified range.
 ```
 Accepted Values: (1, 16)
 auto: 1
 ```
 ### sharpenStrength (sharpen-strength)
-Sets the intensity of the sharpen pass. Default value is 0.
+Sets the intensity of the sharpen pass.
 ```
 Accepted Values: [0, 1]
+auto: 0
 ```
 ### bloomStrength (bloom-strength)
 Sets the intensity of the Bloom pass. This setting produces the effect of bright light on a camera, 
- creating fringes of light extending beyond the borders of a bright area. Default value is 0.
+ creating fringes of light extending beyond the borders of a bright area.
 ```
 Accepted Values: [0, Infinity)
+auto: 0
 ```
 ### bloomRadius (bloom-radius)
 The radius of the Bloom kernel. Larger values produce a wider, softer glow while smaller values will create
- a more concentrated, sharp glow. Default value is 0.
+ a more concentrated, sharp glow.
 ```
 Accepted Values: [0, 5]
+auto: 0
 ```
 ### bloomThreshold (bloom-threshold)
-Indicates the brightness threshold a pixel must meet to contribute to the bloom effect. Default value is 0.85.
+Indicates the brightness threshold a pixel must meet to contribute to the bloom effect.
 ```
 Accepted Values: [0, Infinity)
 auto: 0.85
 ```
 ### ssaoStrength (ssao-strength)
 Controls the intensity of the shadowing applied to occluded areas. Higher value results in darker occluded areas 
- which may look unnatural if overdone. Default 4.
+ which may look unnatural if overdone.
 ```
 Accepted Values: [0, 20]
 auto: 4
 ```
 ### ssaoRadius (ssao-radius)
-Determines how far the occlusion effect spreads. Default 1.
+Determines how far the occlusion effect spreads.
 ```
 Accepted Values: [0, 3]
 auto: 1
 ```
 ### enableSsr (enable-ssr)
 Setting this flag will enable screen space reflections.
+
 ### hueShift (hue-shift)
-Angle by which hue component of individual pixel colors is rotated. Accepts degrees or radians, default is 0.
+Angle by which hue component of individual pixel colors is rotated.
 ```
-Accepted Values: [0, 6.283185307179586]
-auto: 0rad
+Accepted Values: [0, 360deg]
+auto: "0deg"
 ```
 ### saturation
-Amount by which pixel colors are super-saturated or desaturated. Default 1.
+Amount by which pixel colors are super-saturated or desaturated.
 ```
 Accepted Values: [0, Infinity)
 auto: 1
 ```
 ### brightness
-Applies the linear multiplier to pixel colors. Default 0.
+Applies the linear multiplier to pixel colors.
 ```
 Accepted Values: [-1, 1]
+auto: 0
 ```
 ### contrast
-Sets the contrast factor of the rendered image. Default 1.
+Sets the contrast factor of the rendered image.
 ```
 Accepted Values: [0, 2]
 auto: 1
@@ -374,109 +368,131 @@ Accepted Values: normal, depth-write
 auto: normal
 ```
 [Back to Top](#attributes-reference)
+
 ## Lighting
 Controls for Lighting and Shadows in the scene, including the Environment map. Lighting controls
  for both the lights present in the model and custom lighting to add to the scene.
 
 ### environmentSrc (environment-src)
 A URL to the HDR file containing the equirectangular environment map.
+```
+auto: ""
+```
+
 ### environmentRotation (environment-rotation)
 Euler angles specifying environment rotation around X, Y, and Z axes.
- Rotations are applied in YXZ order, meaning the model is first rotated around Z axis, then X, then Y.
+Rotations are applied in YXZ order, meaning the model is first rotated around Z axis, then X, then Y.
 ```
-Accepted Values: (-Infinity, Infinity)
-auto: 0deg 0deg 0deg
+Accepted Values: (-Infinity, Infinity) (-Infinity, Infinity) (-Infinity, Infinity)
+auto: "0deg 0deg 0deg"
 ```
 ### skybox
 Indicates whether the environment map should be used as the scene's background.
+
 ### shadowIntensity (shadow-intensity)
-Intensity of the ground shadow cast by the model. Default 0.
+Intensity of the ground shadow cast by the model.
 ```
 Accepted Values: [0, 1]
+auto: 0
 ```
 ### shadowRadius (shadow-radius)
-Radius of blur kernal used when rendering shadows. Default 2.
+Radius of blur kernal used when rendering shadows.
 ```
 Accepted Values: [0, 20]
 auto: 2
 ```
 ### shadowSamples (shadow-samples)
-Number of samples used when blurring the shadow. Default 16.
-Property domain is an `Integer Interval`, passing non-integer values will result in their discarding and the defaults set.
+Number of samples used when blurring the shadow. Accepted values are integers in the specified range.
 ```
 Accepted Values: [1, Infinity)
 auto: 16
 ```
 ### shadowResolution (shadow-resolution)
-The resolution of the shadow map. Default 512, accepts [1,Infinity). Recommended to use power of two values 
- such as 256, 512, 1024, etc.
-Property domain is an `Integer Interval`, passing non-integer values will result in their discarding and the defaults set.
+The resolution of the shadow map. Default 512, accepts [1,Infinity). 
+Accepted values are integers in the specified range.
 ```
 Accepted Values: [1, Infinity)
 auto: 512
 ```
 ### shadowOffset (shadow-offset)
 Vertical offset of the plane onto which the shadow is cast. Zero shadow offset renders the shadow
- in the horizontal plane passing through the base of the model's bounding box. Can be expressed as a strict distance in
- units `m, cm, mm` or a coefficient of `r, w, d, h`. The units need to be included in the passed value, i.e. `0h`.
+in the horizontal plane passing through the base of the model's bounding box. 
+ 
 ```
+Accepted Values: (-Infinity, Infinity)
 auto: 0h
 ```
+
 ### lightRigIntensity (light-rig-intensity)
-Number value scaling the intensity of all light rigs. Default 1.
+Number value scaling the intensity of all light rigs.
 ```
 Accepted Values: [0, Infinity)
 auto: 1
 ```
 ### lightRigColor (light-rig-color)
-Adds a color to light rigs. Accepts colors in hex format, default `null` meaning no color override.
+Overrides the color of individual lights in the light rig. Setting the value to `null` indicates
+colors shouldn't be overridden.
+```
+auto: null
+```
+
 ### lightRig (light-rig)
-Defines light rig configurations to be added to the scene. Unless hideModelLights is set, these will
- not be set in place of any model lights, but instead applied in conjunction with the model lights.
- There are three types of accepted lights: `directional`, `point`, and `spot`. `directional` and `point` use the same
- configuration, while `spot` expects additional values. All three types consist of the properties `intensity`, `color`,
- `position`, and `direction`, while `spot` lights also include `angle` and `penumbra`.
- 
- The `lightRig` is passed as a ';' separated list of lights, in a single string such as:
+Specifies an additional lights that will be added to the scene alongside the lights present in 
+the model. The list of lights is a `;` separated list of individual light configurations in a single string.
+Each light configuration starts with the type of the light (`directional`, `point`, `spot`) followed by
+different light properties. Directional lights have properties `intensity`, `color`, `position`, and `direction`,
+point lights accept `intensity`, `color`, `position`, and `distance`, while spot lights have `intensity`,
+`color`, `position`, `direction`, `distance`, `angle`, and `penumbra`. Example:
  `directional intensity 1 color #ffffff position 0m 0m 0m direction 0m 1m 0m`
- where we see the structure `type property1 property1Value property2 property2Value...`
+
 #### Example
 ```
 const viewer = document.querySelector('vntana-viewer');
- viewer.lightRig = "directional intensity 1 color #ffffff position 0m 0m 0m direction -0.024428939559004506m 0.6049951951138368m 0.7958542836482022m; directional intensity 1 color #ffffff position 0m 0m 0m direction 0m 1m 0m;"
+ viewer.lightRig = 
+ "
+  directional intensity 1 color #ffffff position 0m 0m 0m direction -0.024428939559004506m 0.6049951951138368m 0.7958542836482022m;
+  directional intensity 1 color #ffffff position 0m 0m 0m direction 0m 1m 0m;
+ "
 ```
 ### hideModelLights (hide-model-lights)
-'Disables' all lights within the model by setting their intensity to 0.
+Hides all lights from the loaded model.
+
 [Back to Top](#attributes-reference)
 ## Jewelry
 Attributes for use when loading jewelry models.
 
 ### enableJewelry (enable-jewelry)
 Enables jewelry rendering mode. Models need to be pre-processed in the VNTANA Platform in order
- for them to be augmented by jewelry-specific data structures.
+for them to be augmented by jewelry-specific data structures.
+
 ### gemAntiAliasing (gem-anti-aliasing)
 Enables anti-aliasing when rendering gems.
+
 ### gemRayTracingDepth (gem-ray-tracing-depth)
-The number of ray tracing steps used when rendering gems. 
- Available values are integers between 1 and 6.
-Property domain is an `Integer Interval`, passing non-integer values will result in their discarding and the defaults set.
+The number of ray tracing steps used when rendering gems. Accepted values are integers in the specified range.
 ```
 Accepted Values: [1, 6]
 auto: 4
 ```
 [Back to Top](#attributes-reference)
+
 ## Loading
 Attributes for the load behavior and whether to display a placeholder image during loading or not.
 
 ### loading
-Indicates what type of loading type to employ when loading the model and setting up the scene. `lazy` is the default option. `hover` 
- is used on showroom viewers.
+Indicates what type of loading strategy to employ when loading the model and setting up the scene. 
+`"eager"` starts loading as soon as possible, `"lazy"` when element is near the viewport, and `"hover"` 
+when the pointer enters the element.
 ```
 Accepted Values: lazy, eager, hover
 auto: lazy
 ```
 ### poster
 A URL to a poster/thumbnail image to be displayed while the model is loading.
+```
+auto: ""
+```
+
 #### Example
 ```
 <!-- HTML -->
@@ -487,15 +503,45 @@ A URL to a poster/thumbnail image to be displayed while the model is loading.
  viewer.poster = './DamagedHelmet.png';
 ```
 [Back to Top](#attributes-reference)
+
+## Augmented Reality
+### usdzSrc (usdz-src)
+A URL to a USDZ model to load in AR on iOS devices. HTML attribute is `usdz-src`.
+#### Example
+```
+// Script
+ const viewer = document.querySelector('vntana-viewer');
+ viewer.usdzSrc = ./DamagedHelmet.usdz;
+ 
+ --- or ---
+ 
+ <!-- HTML -->
+ <vntana-viewer src='' usdz-src='./DamagedHelmet.usdz'></vntana-viewer>
+```
+
+### autoAR (auto-ar)
+Determines whether AR should launch once the model loads. Only used if AR is available and ARMode is 
+ determined to be `native`. HTML attribute form is `auto-ar`.
+#### Example
+```
+// Script
+ const viewer = document.querySelector('vntana-viewer');
+ viewer.autoAR = true;
+ 
+ --- or ---
+ 
+ <!-- HTML -->
+ <vntana-viewer src='' auto-ar></vntana-viewer>
+```
+
 ## Utility
 Attributes related to the appearance of the viewer. Currently just allows the setting of the background
  color.
 
 ### background
-Sets the background for the scene. Can be any valid CSS including an image, hex code, transparent, or a radial-gradient.
- Default is `transparent`.
+Sets the CSS style for the viewer's background. Primarily useful when changing between models with different backgrounds, since the update will be applied just before the new model is revealed.
 ```
-auto: transparent
+auto: "transparent"
 ```
 #### Example
 ```
@@ -507,4 +553,3 @@ const viewer = document.querySelector('vntana-viewer');
  viewer.background = 'radial-gradient("#000000","#ffffff")';
 ```
 [Back to Top](#attributes-reference)
-## Attributes Reference
