@@ -8,14 +8,14 @@
   </head>
 
   <body>
-    <script type="module" src="https://viewer-build.vntana.com/v1.1.0/viewer.min.js"></script>
+    <script type="module" src="https://viewer-build.vntana.com/v2.0.0/viewer.min.js"></script>
 
     <vntana-viewer>
     </vntana-viewer>
 
     <script type="module">
       import {Platform} from './platform.js';
-      import {normalize, VntanaViewer} from "https://viewer-build.vntana.com/v1.1.0/viewer.min.js";
+      import {VntanaViewer} from "https://viewer-build.vntana.com/v2.0.0/viewer.min.js";
 
       const email = "<username>";
       const password = "<password>";
@@ -47,7 +47,7 @@
       }
 
       const product = await platform.getProduct(productUuid);
-      const viewerConfig = normalize(JSON.parse(product.viewerSettings.value));
+      const viewerConfig = JSON.parse(product.viewerSettings.config);
       const src = platform.getModelURL(workspaceUuid, productUuid);
 
       VntanaViewer.setModelRequestHeaders(platform.getHeaders());
@@ -59,9 +59,7 @@
 
       const viewer = document.querySelector("vntana-viewer");
 
-      for (const [key, value] of Object.entries(config)) {
-        viewer[key] = value; 
-      }
+      Object.assign(viewer, config);
     </script>
   </body>
 </html>

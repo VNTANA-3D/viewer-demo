@@ -22,6 +22,6 @@ export async function getPlatformData(organization, workspace, product) {
     usdzSrc,
     poster,
     qrUrl,
-    config: JSON.parse(productData.response.viewerSettings.value),
+    config: JSON.parse(productData.response.viewerSettings.config),
   };
 }

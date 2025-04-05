@@ -8,7 +8,7 @@
   </head>
 
   <body>
-    <script type="module" src="https://viewer-build.vntana.com/v1.1.0/viewer.min.js"></script>
+    <script type="module" src="https://viewer-build.vntana.com/v2.0.0/viewer.min.js"></script>
 
     <vntana-viewer>
       <vntana-fs-button></vntana-fs-button>
@@ -23,14 +23,13 @@
 
     <script type="module">
       import {getPlatformData} from "./platform.js";
-      import {normalize} from "https://viewer-build.vntana.com/v1.1.0/viewer.min.js";
+      import {normalize} from "https://viewer-build.vntana.com/v2.0.0/viewer.min.js";
 
       const platformData = await getPlatformData(
         "asset-library",
         "furniture",
         "85a51c7b-07c1-4143-bd56-aa2a43acaa42"
       );
-      platformData.config = normalize(platformData.config);
 
       const config = {
         src: platformData.src,
@@ -41,9 +40,7 @@
 
       const viewer = document.querySelector("vntana-viewer");
 
-      for (const [key, value] of Object.entries(config)) {
-        viewer[key] = value; 
-      }
+      Object.assign(viewer, config);
 
       const qrButton = viewer.querySelector("vntana-qr-button");
       qrButton.url = platformData.qrUrl;
