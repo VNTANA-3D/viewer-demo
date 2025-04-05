@@ -9,15 +9,22 @@
 
 * [Hotspots](./docs/hotspots.md)
 
-## Basic Usage
-The viewer is a custom web component, and can thus be placed into your web page as any standard HTML element. Before doing so, the script containing the element definition needs to be loaded. ES and UMD modules are available, and can be obtained from the following links:
+
+## Introduction
+VNTANA Viewer is a custom web component for rendering glTF/GLB files in the browser. As a web component
+it can be placed, styled, and manipulated like any standard HTML element in the web page, while multiple
+options allow fine-grained customization of the 3D experience.
+
+The `<vntana-viewer>` element definition can be loaded through either an ES or UMD standalone modules from 
+the following links:
 ```
 https://viewer-build.vntana.com/v2.0.0/viewer.min.js
 https://viewer-build.vntana.com/v2.0.0/viewer.umd.min.js
 ```
-`v2.0.0` is the current latest version of the viewer. These scripts define `<vntana-viewer>` element out-of-the-box, and since they are minified standalone builds, no additional preparation steps are necessary.
 
-A simple example demonstrating basic usage of the viewer is as follows: If we wanted to load the model `DamagedHelmet.glb` with environment map `Neutral.hdr`, we could do it as
+Once the element definition is loaded, in order to load the model `DamagedHelmet.glb` with environment map `Neutral.hdr`, for example, it suffices to 
+specify the corresponding attributes on the element:
+
 ```
 <html>
   <head>
@@ -30,7 +37,6 @@ A simple example demonstrating basic usage of the viewer is as follows: If we wa
 </html>
 ```
 
-The viewer element is a custom HTML element, and can thus be manipulated, styled, and placed anywhere in the DOM just as a regular element would be. If no attributes are specified, the viewer acts as an empty element. **Note** that although the viewer doesn't have any children in this example, the closing tag is still **mandatory**.
 
 ## Use Cases
 This package comes with three scripts, each demonstrating different aspects of the viewer:
