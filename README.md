@@ -42,7 +42,7 @@ specify the corresponding attributes on the element:
 This package comes with three scripts, each demonstrating different aspects of the viewer:
 
 - `simple` - adds the viewer to a web page, and sets it up to display a 3d model with the environment map through the attribute interface,
-- `guided` - creates custom points of interest similar to hotspots without placing a pin on the model,
+- `custom` - creates custom points of interest similar to hotspots without placing a pin on the model,
 - `integration` - fetches data from VNTANA Platform and applies it to the viewer through the property interface,
 - `internal` - similar to `integration`, but loads data for Live Internal model instead of Live Public.
 
