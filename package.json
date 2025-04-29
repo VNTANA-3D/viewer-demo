@@ -7,6 +7,7 @@
     "simple": "npx http-server -o simple/index.html",
     "integration": "npx http-server -o integration/index.html",
     "internal": "npx http-server -o internal/index.html",
+    "custom": "npx http-server -o custom/index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "VNTANA",

@@ -42,6 +42,7 @@ specify the corresponding attributes on the element:
 This package comes with three scripts, each demonstrating different aspects of the viewer:
 
 - `simple` - adds the viewer to a web page, and sets it up to display a 3d model with the environment map through the attribute interface,
+- `guided` - creates custom points of interest similar to hotspots without placing a pin on the model,
 - `integration` - fetches data from VNTANA Platform and applies it to the viewer through the property interface,
 - `internal` - similar to `integration`, but loads data for Live Internal model instead of Live Public.
 
@@ -68,6 +69,84 @@ Directory simple contains the `index.html` containing the page's HTML code, the 
 ```
 
 Line `2` loads the ES module containing the viewer. Line `4` adds the viewer elements, sets the model through the `src` attribute and environment through `environment-src`. We also added the `tone-mapping` attribute to improve the lighting experience. `<vntana-fs-button>` is added as a child of the viewer, and toggles the viewer’s fullscreen state when clicked.
+
+### Custom Example
+
+This example provides an example of how you can create a custom UI with hotspot-like callouts which update the camera and provide information in a small panel. Directory `custom` contains the HTML code, example model `yacht.glb`, `custom.css` to contain the styling that is unique to this project, and sub-directory containing thumbnails which will be used for the points of interest. 
+
+Creating the viewer resembles the `simple` example, however we do not add the `vntana-fs-button` while also setting a couple of extra attributes:
+
+```html
+<script type="module" src="https://viewer-build.vntana.com/v2.0.0/viewer.min.js"></script>
+
+<vntana-viewer 
+  src="yacht.glb" 
+  environment-src="Neutral.hdr" 
+  tone-mapping="neutral" 
+  background="radial-gradient(rgb(206,218,229),rgb(206,218,229))"
+  camera-rotation="0.029152963801224008rad -0.7897278114867406rad 0rad"
+  min-camera-distance="0r"
+>
+</vntana-viewer>
+```
+These deviations from the `simple` example are optional. We set a `radial-gradient` background, as well as the initial `camera-rotation` for the model. Additionally, we need to set the `min-camera-distance` to `0r` to allow us to set camera positions that are within the model. This is only necessary if your model and callouts need to zoom in this much, otherwise you can test around with different minimums to find a value that works for you, or just rely on the default.
+
+The first piece of custom UI used in this demo is to add thumbnail buttons on top of the viewer. The general structure of these buttons is:
+```html
+<div id="thumbnail-container">
+  <div id="side-view">
+    <img draggable="false" src="thumbnails/side-view.png">
+    <span>OceanDream 5000</span>
+  </div>
+  ...
+</div>
+```
+Each of these buttons will act as a pseudo-hotspot without the need to set a hotspot's position on the model. By clicking one of the thumbnail buttons, the camera will move to the new location by setting the `cameraRotation`, `cameraTarget`, and `cameraDistance`.
+```javascript
+document.getElementById("back-deck").addEventListener("click", () => {
+  ...
+  viewer.setCameraRotation("-0.37610209735644085rad -2.712091563132102rad 0rad");
+  viewer.setCameraDistance("0.8092878883914102r");
+  viewer.setCameraTarget("0.09354871669701487r -0.7367940167180103r -0.23263606352595337r");
+});
+```
+**NOTE**: To determine the values which are being passed in the above example, you can utilize the methods `getCameraRotation`, `getCameraTarget`, and `getCameraDistance` with the viewer in a dev environment after positioning the camera where you wish it to update to.
+
+Next, we add a *callout* panel that will appear in the bottom right corner when one of the point of interest thumbnails are selected. 
+```html
+<div id="callout" class="callout inactive squashed">
+  <svg class="logo" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">...</svg>
+  <h1 id="callout-header" class="header"></h1>
+  <p id="callout-text" class="text"></p>
+</div>
+```
+
+With this we just use standard CSS and Javascript to show/update the contents of this callout panel, this is completely external to viewer functionality.
+```Javascript
+function showCallout() {
+  document.getElementById("callout").classList.remove("squashed");
+  document.getElementById("callout").classList.remove("inactive");
+}
+...
+document.getElementById("side-view").addEventListener("click", () => {
+  ...
+  showCallout();
+  document.getElementById("callout-header").innerText = "";
+  document.getElementById("callout-text").innerText = "";
+  ...
+});
+```
+
+Finally, in this demo, the fullscreen button and functionality is customized to both allow for full control over styling the button, as well as ensuring the other custom UI elements are included when in fullscreen view. We add a fullscreen button to a controls element:
+```html
+<div id="controls">
+  <div alt="Toggle Fullscreen" id="fullscreen-button" class="fullscreen-button hidden">
+    <svg class="open" stroke="currentColor" fill="none" stroke-width="0" viewBox="0 0 15 15" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">...</svg>
+    <svg class="close fullscreen" stroke="currentColor" fill="none" stroke-width="0" viewBox="0 0 15 15" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">...</svg>
+  </div>
+</div>
+```
+There are two icons, one for when fullscreen is open and another for when fullscreen is closed. We then add an event listener to the `fullscreen-button` element to tigger fullscreen when clicked, and handle the swapping of fullscreen button svg's on lines `138-153`. We check if the document has a fullscreen element already on line `139`, which determines on lines `141-150` whether to enter fullscreen or exit. Finally on line `152` we toggle the `fullscreen` class on the `fullscreen-button` element to ensure the correct svg is being shown at all times.
 
 ### Integration Example
 
