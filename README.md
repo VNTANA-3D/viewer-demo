@@ -44,6 +44,7 @@ This package comes with three scripts, each demonstrating different aspects of t
 - `simple` - adds the viewer to a web page, and sets it up to display a 3d model with the environment map through the attribute interface,
 - `integration` - fetches data from VNTANA Platform and applies it to the viewer through the property interface,
 - `internal` - similar to `integration`, but loads data for Live Internal model instead of Live Public.
+- `hotspots` - built off the `simple` solution, this loads a local asset and pulls hotspot data from memory to create generic hotspots.
 
 The accompanying `npm` package doesn't need any prior installation. In order to run the scripts it suffices
 to execute `npm run simple` or `npm run integration` from the package’s root directory. Both scripts run the `http-server` and open the corresponding page in the browser.
@@ -191,3 +192,54 @@ viewer in the same way we did in the last example.
 an array of all available presets within the organization (or workspace if `workspaceUuid` is provided).
 Each entry in the array contains the `config` property whose value is JSON string of viewer settings. 
 This settings can be used as other viewer settings we encountered in the examples.
+
+### Hotspots Example
+
+The `hotspots` example covers the creation of hotspots using the `vntana-hotspot` custom HTML element. The `hotspots` directory contains 
+`index.html` and `hotspots.js`. The demo is created as a simple example where hotspot data is pulled on page load and each hotspot is appended
+to the `vntana-viewer` element.
+
+When working with the `vntana-hotspot` element, it is important first to understand what it is and what it isn't. The `vntana-hotspot` element itself 
+largely just exists as a point within the viewer, typically on the model. It contains `position` and `normal` attributes which are used to
+update where in the viewer/on the model the hotspot exists, as well as when it is determined to be *behind* the model. Out of the box, a `vntana-hotspot` has
+no visual representation, however the element itself can be styled as you see fit. To create a cicular pin for it you can use the styling:
+
+```css
+vntana-hotspot {
+    background-color: #4b61f9; 
+    border: 2px solid white; 
+    color: white; 
+    border-radius: 50%; 
+    width: 26px; 
+    height: 26px;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+}
+```
+This will create a similar style pin as what is in VNTANA embed links, without the number in the middle. Additional styling can be added for the `hide` class on
+the `vntana-hotspot` element which is toggled when the viewer uses the `normal` to determine whether it is *behind* the model or not.
+```css
+vntana-hotspot.hide {
+    opacity: 50%;
+    pointer-events: none;
+}
+```
+We disable mouse interactions when `hide` is present, however this is not necessary.
+
+To actually add hotspots, we first need to retrieve their data. In the demo, this is just done by pulling from memory, however the method
+`requestHotspotData` on line 21 should be viewed as a placeholder for the method needed in your implementation to pull the data. This can be handled
+by requesting it from a database via methods such as HTTP calls, reading from a file, or pulling from memory. 
+
+On lines `24-27`, we will iterate over each hotspot returned and create their corresponding `vntana-hotspot` element, before appending to the 
+viewer. The expected hotspot data should have values for the `position` and `normal` for each needed hotspot, at a minimum. These values will be 
+`positions` consisting of three values and their units, such as `0m 0m 0m`. In addition to this info, you could also have:
+- `Camera Settings`: these can be utilized with an on-click event handler for the `vntana-hotspot` to update the camera to a specific place for hotspot.
+- `Details`: This is vague, but can be any content you can place as a child of the `vntana-hotspot`. In this demo, we just create a `div` to house some text.
+- `uuid`: It is recommended to generate `uuid`'s for your hotspots so you can sync them with your models and any pre-existing database entities intended to be displayed in the hotspot. This assumes you are not retrieving hotspots from the VNTANA Platform via the API.
+
+In `hotspots.js` the process of creating each individual hotspot occurs on lines `34-70`. First, on line `36` the `vntana-hotspot` element is created and the `position` and `normal` attributes are set. Then, on line `41` a `div` is created which will be house the information we wish to display when the hotspot is clicked, which will be appended to the `vntana-hotspot` as a child. A `p` element is created on line `46` housing the text for that hotspot and appended to the `div`. These steps are dependent on if and how you wish to hae extra info displayed when a hotspot is clicked. It can also be displayed on a side panel in which case you would not append these as children to the `vntana-hotspot`.
+
+Finally, we add some `click` listeners to the hotspot. On lines `51-55` we add a listener for when the hotspot is clicked which toggles the `hidden` class to show or display the intended info for the hotspot. Additionally, if the hotspot had `camera` data, we call the `moveCamera` method to update camera settings. On lines `57-67` we add `mousedown` and `mouseup` events to handle ensuring that when a hotspot's content is visible, and you click elsewhere, the hotspot panel is hidden once more, similar to the behavior on the VNTANA Platform.

@@ -3,8 +3,8 @@
   <head>
     <link rel="icon" href="data:;base64,iVBORwOKGO=" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" href="../shared/viewer.css" />
-    <link rel="stylesheet" href="../shared/style.css" />
+    <link rel="stylesheet" href="../shared/styles/viewer.css" />
+    <link rel="stylesheet" href="../shared/styles/style.css" />
   </head>
 
   <body>
@@ -23,7 +23,6 @@
 
     <script type="module">
       import {getPlatformData} from "./platform.js";
-      import {normalize} from "https://viewer-build.vntana.com/v2.0.0/viewer.min.js";
 
       const platformData = await getPlatformData(
         "asset-library",
