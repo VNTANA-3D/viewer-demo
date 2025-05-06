@@ -5,13 +5,27 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="stylesheet" href="../shared/styles/viewer.css" />
     <link rel="stylesheet" href="../shared/styles/style.css" />
+    <link rel="stylesheet" href="../shared/styles/hotspots.css" />
   </head>
 
   <body>
     <script type="module" src="https://viewer-build.vntana.com/v2.0.0/viewer.min.js"></script>
+    <script type="text/javascript" src="./hotspots.js"></script>
 
     <vntana-viewer src="../shared/assets/chair.glb" environment-src="../shared/Neutral.hdr" tone-mapping="neutral">
       <vntana-fs-button></vntana-fs-button>
+      <vntana-center-button></vntana-center-button>
     </vntana-viewer>
+
+    <script type="module">
+      await requestHotspotData().then(hotspots => {
+        const viewer = document.querySelector("vntana-viewer")
+    
+        for (const hs of hotspots) {
+          let hotspot = createHotspot(hs)
+          viewer.appendChild(hotspot)
+        }
+      })
+    </script>
   </body>
 </html>
