@@ -41,34 +41,17 @@ specify the corresponding attributes on the element:
 ## Use Cases
 This package comes with three scripts, each demonstrating different aspects of the viewer:
 
-- `simple` - adds the viewer to a web page, and sets it up to display a 3d model with the environment map through the attribute interface,
 - `live-public` - fetches data from VNTANA Platform and applies it to the viewer through the property interface,
 - `live-internal` - similar to `live-public`, but loads data for Live Internal model instead of Live Public.
-- `hotspots` - built off the `simple` solution, this loads a local asset and pulls hotspot data from memory to create generic hotspots.
+- `hotspots` - loads a local asset and pulls hotspot data from memory to create generic hotspots.
 
 The accompanying `npm` package doesn't need any prior installation. In order to run the scripts it suffices
-to execute `npm run simple` or `npm run live-public` from the package’s root directory. Both scripts run the `http-server` and open the corresponding page in the browser.
+to execute `npm run <script-name>` from the package’s root directory. Both scripts run the `http-server` and open the corresponding page in the browser.
 
 All examples utilize the styles in the shared directory:
 
 - `style.css` - styles used for this demo,
 - `viewer.css` - default styles for the viewer and positioning of buttons.
-
-### Simple Example
-
-Directory simple contains the `index.html` containing the page's HTML code, the `chair.glb` model, and `Neutral.hdr` environment map. The body of the document is:
-
-```html
-  <body>
-    <script type="module" src="https://viewer-build.vntana.com/v2.0.0/viewer.min.js"></script>
-
-    <vntana-viewer src="chair.glb" environment-src="Neutral.hdr" tone-mapping="neutral">
-      <vntana-fs-button></vntana-fs-button>
-    </vntana-viewer>
-  </body>
-```
-
-Line `2` loads the ES module containing the viewer. Line `4` adds the viewer elements, sets the model through the `src` attribute and environment through `environment-src`. We also added the `tone-mapping` attribute to improve the lighting experience. `<vntana-fs-button>` is added as a child of the viewer, and toggles the viewer’s fullscreen state when clicked.
 
 ### Live Public Example
 
