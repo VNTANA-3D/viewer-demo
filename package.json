@@ -5,10 +5,9 @@
   "main": "index.js",
   "scripts": {
     "simple": "npx http-server -o simple/index.html",
-    "integration": "npx http-server -o integration/index.html",
-    "internal": "npx http-server -o internal/index.html",
-    "hotspots": "npx http-server -o hotspots/index.html",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "live-public": "npx http-server -o live-public/index.html",
+    "live-internal": "npx http-server -o live-internal/index.html",
+    "hotspots": "npx http-server -o hotspots/index.html"
   },
   "author": "VNTANA",
   "license": "ISC",

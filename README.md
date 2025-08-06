@@ -42,12 +42,12 @@ specify the corresponding attributes on the element:
 This package comes with three scripts, each demonstrating different aspects of the viewer:
 
 - `simple` - adds the viewer to a web page, and sets it up to display a 3d model with the environment map through the attribute interface,
-- `integration` - fetches data from VNTANA Platform and applies it to the viewer through the property interface,
-- `internal` - similar to `integration`, but loads data for Live Internal model instead of Live Public.
+- `live-public` - fetches data from VNTANA Platform and applies it to the viewer through the property interface,
+- `live-internal` - similar to `live-public`, but loads data for Live Internal model instead of Live Public.
 - `hotspots` - built off the `simple` solution, this loads a local asset and pulls hotspot data from memory to create generic hotspots.
 
 The accompanying `npm` package doesn't need any prior installation. In order to run the scripts it suffices
-to execute `npm run simple` or `npm run integration` from the package’s root directory. Both scripts run the `http-server` and open the corresponding page in the browser.
+to execute `npm run simple` or `npm run live-public` from the package’s root directory. Both scripts run the `http-server` and open the corresponding page in the browser.
 
 All examples utilize the styles in the shared directory:
 
@@ -70,9 +70,9 @@ Directory simple contains the `index.html` containing the page's HTML code, the 
 
 Line `2` loads the ES module containing the viewer. Line `4` adds the viewer elements, sets the model through the `src` attribute and environment through `environment-src`. We also added the `tone-mapping` attribute to improve the lighting experience. `<vntana-fs-button>` is added as a child of the viewer, and toggles the viewer’s fullscreen state when clicked.
 
-### Integration Example
+### Live Public Example
 
-Directory `integration` contains two files: `index.html` with HTML code for the page, and `platform.js` containing the function `getPlatformData`, which we will use to fetch the product data from VNTANA Platform.
+Directory `live-public` contains two files: `index.html` with HTML code for the page, and `platform.js` containing the function `getPlatformData`, which we will use to fetch the product data from VNTANA Platform.
 
 **NOTE**: Function `getPlatformData` only works with products in `Live Public` state.
 
@@ -135,7 +135,7 @@ The function returns an object with the following properties:
 The `qrUrl` should in almost all cases be replaced with a different URL for custom integrations. After obtaining the platform data in lines `4-8`. In lines `10-15` we merge all the data into one config containing a list of `(key,value)` pairs that will be passed to the viewer. In line `17` we obtain a reference to the viewer, and call `Object.assign` on it with the config in line `19`. We obtain the reference to the `<vntana-qr-button>` in line `21`, and pass it the `qrUrl` string.
 
 
-### Internal Example
+### Live Internal Example
 
 This example demonstrates how to load product data from VNTANA Platform for products
 which are not publicly available. This requires the product to be in a Live Internal state,
@@ -143,7 +143,7 @@ and the user will first need to log in to the Platform. The example won't work
 out-of-the-box, since the user should first input their email and password, as well as 
 organization and workspace slug, before proceeding. 
 
-Directory `internal` contains files `index.html` and `platform.js`, latter containing
+Directory `live-internal` contains files `index.html` and `platform.js`, latter containing
 the `Platform` class. The purpose of this class is to abstract away the details of VNTANA API, as well
 as to keep track of tokens needed for authentication into organizations and workspaces. A detailed
 description of Platform's authentication flow can be found [here](https://www.vntana.com/resource/api-authentication/).
