@@ -1,57 +1,43 @@
-# VNTANA Viewer
+# VNTANA Viewer Integration Demos
 
-## Contents
-* [Attributes and Properties](./docs/attributes.md)
+This package contains several demos describing how to fetch 3D model data
+from the VNTANA Platform and pass it to the `<vntana-viewer>` element.
 
-* [UI Buttons](./docs/ui.md)
+## Table of Contents
+- [Getting Started](#getting-started)
+- [Live Public](#live-public)
+- [Live Internal](#live-internal)
+- [Hotspots](#hotspots)
 
-* [Events](./docs/events.md)
+## Getting Started
 
-* [Hotspots](./docs/hotspots.md)
-
-
-## Introduction
-VNTANA Viewer is a custom web component for rendering glTF/GLB files in the browser. As a web component
-it can be placed, styled, and manipulated like any standard HTML element in the web page, while multiple
-options allow fine-grained customization of the 3D experience.
-
-The `<vntana-viewer>` element definition can be loaded through either an ES or UMD standalone modules from 
-the following links:
+To start a demo, run:
+```bash
+npm run <demo-name>
 ```
-https://viewer-build.vntana.com/v2.0.0/viewer.min.js
-https://viewer-build.vntana.com/v2.0.0/viewer.umd.min.js
-```
+This will run a local server and open the demo in your default browser.
+Scripts require no prior installation. 
 
-Once the element definition is loaded, in order to load the model `DamagedHelmet.glb` with environment map `Neutral.hdr`, for example, it suffices to 
-specify the corresponding attributes on the element:
+<div align="center">
 
-```
-<html>
-  <head>
-    <script src="https://viewer-build.vntana.com/v2.0.0/viewer.min.js"></script>
-  </head>
-  <body>
-    <vntana-viewer src="DamagedHelmet.glb" environment-src="Neutral.hdr">
-    </vntana-viewer>
-  </body>
-</html>
-```
+| Demo                              |  Description                                                         |  
+|:---------------------------------:|----------------------------------------------------------------------|
+|[`live-public`](#live-public)      |  Loads the `Live Public` product data from VNTANA Platform           | 
+|[`live-internal`](#live-internal)  |  Loads the `Live Internal` product data with user authentication     |
+|[`hotspots`](#hotspots)            |  Loads the local asset and creates hotspots from local data          |
 
+</div>
 
-## Use Cases
-This package comes with three scripts, each demonstrating different aspects of the viewer:
+Files for each demo can be found in the directory of the same name.
 
-- `live-public` - fetches data from VNTANA Platform and applies it to the viewer through the property interface,
-- `live-internal` - similar to `live-public`, but loads data for Live Internal model instead of Live Public.
-- `hotspots` - loads a local asset and pulls hotspot data from memory to create generic hotspots.
+For basic usage and full documentation of the `<vntana-viewer>` component,
+visit the [Viewer NPM Page](https://www.npmjs.com/package/@vntana/viewer).
+Bundled code of the viewer package is available through [UNPKG](https://unpkg.com) or [jsDelivr](https://jsdelivr.com)
+as `bundle.js` (ESM) or `bundle.umd.js` (UMD).
 
-The accompanying `npm` package doesn't need any prior installation. In order to run the scripts it suffices
-to execute `npm run <script-name>` from the package’s root directory. Both scripts run the `http-server` and open the corresponding page in the browser.
-
-All examples utilize the styles in the shared directory:
-
-- `style.css` - styles used for this demo,
-- `viewer.css` - default styles for the viewer and positioning of buttons.
+All demos use shared styles found in the `shared` directory:
+- `style.css`: custom demo styles,
+- `viewer.css`: default styles for the viewer and button positioning.
 
 ### Live Public Example
 
