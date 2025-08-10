@@ -27,11 +27,11 @@ const HOTSPOTS = [
     }
 ];
 
-const requestHotspotData = async () => {
+export const requestHotspotData = async () => {
     return HOTSPOTS
 }
 
-function createHotspot( data ) {
+export function createHotspot( data ) {
     // Create Hotspot
     let hotspot = document.createElement("vntana-hotspot")
     hotspot.position = data.position
@@ -75,6 +75,6 @@ function moveCamera(camera) {
     viewer.setCameraRotation(camera.cameraRotation)
     viewer.setCameraDistance(camera.cameraDistance)
     viewer.setCameraTarget(camera.cameraTarget)
-    viewer.setCameraFoV(camera.fieldOfView)
+    viewer.setFieldOfView(camera.fieldOfView)
     viewer.setOrthographicSize(camera.orthographicSize)
 }

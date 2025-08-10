@@ -28,16 +28,47 @@ Scripts require no prior installation.
 
 </div>
 
-Files for each demo can be found in the directory of the same name.
-
 For basic usage and full documentation of the `<vntana-viewer>` component,
 visit the [Viewer NPM Page](https://www.npmjs.com/package/@vntana/viewer).
 Bundled code of the viewer package is available through [UNPKG](https://unpkg.com) or [jsDelivr](https://jsdelivr.com)
 as `bundle.js` (ESM) or `bundle.umd.js` (UMD).
 
-All demos use shared styles found in the `shared` directory:
-- `style.css`: custom demo styles,
-- `viewer.css`: default styles for the viewer and button positioning.
+Files for each demo can be found in the directory of the same name. Each directory contains files:
+- `index.html`: main content of the page,
+- `main.js`: fetching data and assigning it to the elements.
+
+File `index.html` has roughly the same structure in all demos:
+```html
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="../shared/styles/viewer.css" />
+    <link rel="stylesheet" href="../shared/styles/style.css" />
+  </head>
+
+  <body>
+    <script 
+      type="module" 
+      src="https://cdn.jsdelivr.net/npm/@vntana/viewer/dist/bundle.js"
+    ></script>
+
+    <vntana-viewer>
+        <!--- buttons -->
+    </vntana-viewer>
+
+    <script type="module" src="main.js"></script>
+  </body>
+```
+
+Inside the document's `<head>` we set the page viewport (necessary for proper scaling of the
+viewer on mobile devices), and load two stylesheets:
+- `viewer.css`: default styles for the viewer and button positioning,
+- `style.css`: custom demo styles.
+
+Inside the `<body>` element, we start by loading the viewer code script. This script defines `<vntana-viewer>`,
+`<vntana-hotspot>`, and all button elements. We continue by adding the `<vntana-viewer>` element
+to the page and different buttons as its children. Finally, we load the page logic from `main.js`
+with the `<script>` element.
+
 
 ### Live Public Example
 
