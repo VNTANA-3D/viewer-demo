@@ -33,6 +33,7 @@ visit the [Viewer NPM Page](https://www.npmjs.com/package/@vntana/viewer).
 Bundled code of the viewer package is available through [UNPKG](https://unpkg.com) or [jsDelivr](https://jsdelivr.com)
 as `bundle.js` (ESM) or `bundle.umd.js` (UMD).
 
+## Common Code
 Files for each demo can be found in the directory of the same name. Each directory contains files:
 - `index.html`: main content of the page,
 - `main.js`: fetching data and assigning it to the elements.
@@ -59,15 +60,19 @@ File `index.html` has roughly the same structure in all demos:
   </body>
 ```
 
-Inside the document's `<head>` we set the page viewport (necessary for proper scaling of the
-viewer on mobile devices), and load two stylesheets:
+Inside the document's `<head>` we set the page viewport and load two stylesheets:
 - `viewer.css`: default styles for the viewer and button positioning,
 - `style.css`: custom demo styles.
 
-Inside the `<body>` element, we start by loading the viewer code script. This script defines `<vntana-viewer>`,
-`<vntana-hotspot>`, and all button elements. We continue by adding the `<vntana-viewer>` element
-to the page and different buttons as its children. Finally, we load the page logic from `main.js`
-with the `<script>` element.
+**NOTE:** Setting page viewport is required for proper scaling of the viewer on mobile devices.
+
+The `<body>` element starts with loading the viewer code script. This script defines `<vntana-viewer>`
+and all components (hotspots, buttons, ...). We continue by adding the `<vntana-viewer>` element
+to the page and place different buttons as its children. All buttons work out-of-the-box without
+any additional configuration, except for the QR button, which requires we pass it the URL that
+will be encoded in the QR code.
+
+Finally, we load the page logic from `main.js` with the `<script>` element.
 
 
 ### Live Public Example
