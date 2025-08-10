@@ -5,6 +5,7 @@ from the VNTANA Platform and pass it to the `<vntana-viewer>` element.
 
 ## Table of Contents
 - [Getting Started](#getting-started)
+- [Common Code](#common-code)
 - [Live Public](#live-public)
 - [Live Internal](#live-internal)
 - [Hotspots](#hotspots)
@@ -40,24 +41,24 @@ Files for each demo can be found in the directory of the same name. Each directo
 
 File `index.html` has roughly the same structure in all demos:
 ```html
-  <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" href="../shared/styles/viewer.css" />
-    <link rel="stylesheet" href="../shared/styles/style.css" />
-  </head>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="../shared/styles/viewer.css" />
+  <link rel="stylesheet" href="../shared/styles/style.css" />
+</head>
 
-  <body>
-    <script 
-      type="module" 
-      src="https://cdn.jsdelivr.net/npm/@vntana/viewer/dist/bundle.js"
-    ></script>
+<body>
+  <script 
+    type="module" 
+    src="https://cdn.jsdelivr.net/npm/@vntana/viewer/dist/bundle.js"
+  ></script>
 
-    <vntana-viewer>
-        <!--- buttons -->
-    </vntana-viewer>
+  <vntana-viewer>
+      <!--- buttons -->
+  </vntana-viewer>
 
-    <script type="module" src="main.js"></script>
-  </body>
+  <script type="module" src="main.js"></script>
+</body>
 ```
 
 Inside the document's `<head>` we set the page viewport and load two stylesheets:
@@ -68,86 +69,127 @@ Inside the document's `<head>` we set the page viewport and load two stylesheets
 
 The `<body>` element starts with loading the viewer code script. This script defines `<vntana-viewer>`
 and all components (hotspots, buttons, ...). We continue by adding the `<vntana-viewer>` element
-to the page and place different buttons as its children. All buttons work out-of-the-box without
-any additional configuration, except for the QR button, which requires we pass it the URL that
-will be encoded in the QR code.
-
+to the page and place different buttons as its children. All buttons work out-of-the-box,
+except for the QR button which requires we pass it the URL that will be encoded in the QR code.
 Finally, we load the page logic from `main.js` with the `<script>` element.
 
+Each of the subsequent sections outlines the code in `main.js` of the corresponding demo.
 
-### Live Public Example
 
-Directory `live-public` contains two files: `index.html` with HTML code for the page, and `platform.js` containing the function `getPlatformData`, which we will use to fetch the product data from VNTANA Platform.
+## Live Public
 
-**NOTE**: Function `getPlatformData` only works with products in `Live Public` state.
-
-The first part of the page’s body loads the viewer with different buttons:
-```html
-  <vntana-viewer>
-    <vntana-fs-button></vntana-fs-button>
-    <vntana-qr-button class="expandable"></vntana-qr-button>
-    <vntana-ar-button></vntana-ar-button>
-    <vntana-center-button></vntana-center-button>
-    <div class="button-container zoom-buttons">
-      <vntana-zoom-in-button></vntana-zoom-in-button>
-      <vntana-zoom-out-button></vntana-zoom-out-button>
-    </div>
-  </vntana-viewer>
-```
-Classes `button-container`, `zoom-buttons`, and `expandable` come as part of viewer’s default styling, and are defined in `viewer.css`. Elements `<vntana-qr-button>` and `<vntana-ar-button>` are mutually exclusive, so at most one of them will be visible at any time. Unless we provide the URL that will be encoded in the QR, `<vntana-qr-button>` won’t be visible.
-
-Second part of the body handles the main purpose of this demo - loading data from VNTANA Platform. We start by importing the `getPlatformData` function from file `platform.js`.
+Products in the Platform are determined by their `organizationSlug`, `workspaceSlug`, and
+`productUuid`. These can be obtained from Platform links, which are of the form
 ```js
-  <script type="module">
-    import {getPlatformData} from './platform.js';
-
-    const platformData = await getPlatformData(
-      "asset-library",
-      "furniture",
-      "85a51c7b-07c1-4143-bd56-aa2a43acaa42"
-    );
-
-    const config = {
-      src: platformData.src,
-      usdzSrc: platformData.usdzSrc,
-      poster: platformData.poster,
-      ...platformData.config,
-    };
-
-    const viewer = document.querySelector("vntana-viewer");
-
-    Object.assign(viewer, config);
-
-    const qrButton = viewer.querySelector("vntana-qr-button");
-    qrButton.url = platformData.qrUrl;
-  </script>
+platform.vntana.com/<organizationSlug>/<workspaceSlug>/products/edit/<productUuid>
 ```
 
-The `getPlatformData` function accepts three parameters: `organizationSlug`, `clientSlug`, and `productUuid`. All three parameters can be easily obtained from VNTANA Platform links, since all platform links are of the form:
-
+In this demo we use the product:
+<!-- embedme live-public/main.js#L1-L3 -->
+```js
+const organizationSlug = "asset-library";
+const workspaceSlug = "furniture";
+const productUuid = "85a51c7b-07c1-4143-bd56-aa2a43acaa42";
 ```
-https://platform.vntana.com/<organizationSlug>/<clientSlug>/products/edit/<productUuid>
+
+The endpoint used to fetch product data returns a JSON object with properties
+`success`, `response`, and `errors`.  If the product is available, `success` will 
+be set to `true`, `errors` array will be empty, and `response` will be an object
+with data we need to construct model links and set up the viewer.
+
+<!-- embedme live-public/main.js#L5-L7 -->
+```js
+const baseUrl = `https://api.vntana.com`;
+const endpoint = `/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}`
+const {response, errors} = await fetch(`${baseUrl}${endpoint}`).then(response => response.json());
 ```
 
-The function returns an object with the following properties:
+The `response` object is of the form (with irrelevant data omitted):
+```json
+{
+  "asset": {
+    "thumbnailBlobId": "0159e500-d9e4-4c09-953e-3fc327df263e.png",
+    "models": [
+      {
+        "conversionFormat": "GLB",
+        "modelBlobId": "cc36aed0-df3f-4efa-b590-df752559140f.glb",
+      },
+      {
+        "conversionFormat": "USDZ",
+        "modelBlobId": "cc36aed0-df3f-4efa-b590-df752559140f.usdz",
+      },
+    ]
+  },
+  "viewerSettings": {
+    "config": <stringified JSON>,
+  },
+}
+```
+The viewer loads and renders GLB models specified through its `src` property. The USDZ
+model, necessary for native AR experience on Safari devices, is specified through the `usdzSrc`
+property. To obtain the links to these models, we search the `response.asset.models` array
+for entries with the corresponding `conversionFormat` property. The entry will have the `modelBlobId`
+property, which alongside `organizationSlug`, `workspaceSlug`, and `productUuid`, is sufficient
+to construct the links.
 
-- `src` - URL of the GLB model,
-- `usdzSrc` - URL of the USDZ model,
-- `poster` - URL of the poster/thumbnail,
-- `qrUrl` - URL of the product’s embed link with autoAR enabled,
-- `config` - config data for the viewer without links.
+<!-- embedme live-public/main.js#L13-L20 -->
+```js
+const models = response.asset.models;
+const getModelURL = format => {
+  const id = models.find(model => model.conversionFormat === format).modelBlobId;
+  return `${baseUrl}/assets/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}/${id}`;
+}
 
-The `qrUrl` should in almost all cases be replaced with a different URL for custom integrations. After obtaining the platform data in lines `4-8`. In lines `10-15` we merge all the data into one config containing a list of `(key,value)` pairs that will be passed to the viewer. In line `17` we obtain a reference to the viewer, and call `Object.assign` on it with the config in line `19`. We obtain the reference to the `<vntana-qr-button>` in line `21`, and pass it the `qrUrl` string.
+const src = getModelURL("GLB");
+const usdzSrc = getModelURL("USDZ");
+```
+
+In addition to the GLB and USDZ links, we will also set up the poster, an image which is 
+displayed in the viewer while the model is loading, and the QR link, which will be encoded 
+in the QR code displayed when the QR button is clicked. The poster is set through viewer's
+`poster` property and can be constructed from `asset.thumbnailBlobId`, while QR link is
+set through QR buttons `url` property. The QR URL we construct is just the embed link which
+automatically loads the AR.
 
 
-### Live Internal Example
+<!-- embedme live-public/main.js#L22-L23 -->
+```js
+const poster = `${baseUrl}/assets/thumbnail/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}/`;
+const qrUrl = `https://embed.vntana.com?productUuid=${productUuid}&clientSlug=${workspaceSlug}&organizationSlug=${organizationSlug}&autoAR=true`;
+```
+
+The last piece of information left to obtain are viewer properties like `toneMapping`,
+`fieldOfView`, etc. They are stored as stringified JSON in the `response.viewerSettings.config`.
+
+<!-- embedme live-public/main.js#L25-L25 -->
+```js
+const viewerConfig = JSON.parse(response.viewerSettings.config);
+```
+
+It remains to pass the viewer config, model links, and poster link to the viewer, and to pass the `qrURL`
+to the QR button.
+
+<!-- embedme live-public/main.js#L27-L36 -->
+```js
+const viewer = document.querySelector("vntana-viewer");
+Object.assign(viewer, viewerConfig);
+Object.assign(viewer, {
+  src,
+  usdzSrc,
+  poster,
+});
+
+const qrButton = viewer.querySelector("vntana-qr-button");
+qrButton.url = qrUrl;
+```
+
+## Live Internal
 
 This example demonstrates how to load product data from VNTANA Platform for products
 which are not publicly available. This requires the product to be in a Live Internal state,
 and the user will first need to log in to the Platform. The example won't work
 out-of-the-box, since the user should first input their email and password, as well as 
 organization and workspace slug, before proceeding. 
-
 Directory `live-internal` contains files `index.html` and `platform.js`, latter containing
 the `Platform` class. The purpose of this class is to abstract away the details of VNTANA API, as well
 as to keep track of tokens needed for authentication into organizations and workspaces. A detailed
@@ -198,7 +240,7 @@ an array of all available presets within the organization (or workspace if `work
 Each entry in the array contains the `config` property whose value is JSON string of viewer settings. 
 This settings can be used as other viewer settings we encountered in the examples.
 
-### Hotspots Example
+## Hotspots
 
 The `hotspots` example covers the creation of hotspots using the `vntana-hotspot` custom HTML element. The `hotspots` directory contains 
 `index.html` and `hotspots.js`. The demo is created as a simple example where hotspot data is pulled on page load and each hotspot is appended
@@ -211,17 +253,17 @@ no visual representation, however the element itself can be styled as you see fi
 
 ```css
 vntana-hotspot {
-    background-color: #4b61f9; 
-    border: 2px solid white; 
-    color: white; 
-    border-radius: 50%; 
-    width: 26px; 
-    height: 26px;
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
+  background-color: #4b61f9; 
+  border: 2px solid white; 
+  color: white; 
+  border-radius: 50%; 
+  width: 26px; 
+  height: 26px;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
 }
 ```
 This will create a similar style pin as what is in VNTANA embed links, without the number in the middle. Additional styling can be added for the `hide` class on
