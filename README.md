@@ -91,8 +91,8 @@ In this demo we use the product:
 <!-- embedme live-public/main.js#L1-L3 -->
 ```js
 const organizationSlug = "asset-library";
-const workspaceSlug = "furniture";
-const productUuid = "85a51c7b-07c1-4143-bd56-aa2a43acaa42";
+const workspaceSlug = "viewer-demo";
+const productUuid = "db656517-2842-4e64-a3de-743acee9ff9d";
 ```
 
 The endpoint used to fetch product data returns a JSON object with properties
@@ -100,44 +100,45 @@ The endpoint used to fetch product data returns a JSON object with properties
 be set to `true`, `errors` array will be empty, and `response` will be an object
 with data we need to construct model links and set up the viewer.
 
-<!-- embedme live-public/main.js#L5-L7 -->
+<!-- embedme live-public/main.js#L5-L8 -->
 ```js
 const baseUrl = `https://api.vntana.com`;
-const endpoint = `/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}`
-const {response, errors} = await fetch(`${baseUrl}${endpoint}`).then(response => response.json());
+const productEndpoint = `/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}`
+const productRequest = fetch(`${baseUrl}${productEndpoint}`);
+const product = await productRequest.then(response => response.json());
 ```
 
-The `response` object is of the form (with irrelevant data omitted):
+The `product.response` object is of the form (with irrelevant data omitted):
 ```json
 {
   "asset": {
-    "thumbnailBlobId": "0159e500-d9e4-4c09-953e-3fc327df263e.png",
+    "thumbnailBlobId": "<blob-id>",
     "models": [
       {
         "conversionFormat": "GLB",
-        "modelBlobId": "cc36aed0-df3f-4efa-b590-df752559140f.glb",
+        "modelBlobId": "<blob-id>",
       },
       {
         "conversionFormat": "USDZ",
-        "modelBlobId": "cc36aed0-df3f-4efa-b590-df752559140f.usdz",
+        "modelBlobId": "<blob-id>",
       },
     ]
   },
   "viewerSettings": {
-    "config": <stringified JSON>,
+    "config": "<stringified JSON>",
   },
 }
 ```
 The viewer loads and renders GLB models specified through its `src` property. The USDZ
 model, necessary for native AR experience on Safari devices, is specified through the `usdzSrc`
-property. To obtain the links to these models, we search the `response.asset.models` array
+property. To obtain the links to these models, we search the `product.response.asset.models` array
 for entries with the corresponding `conversionFormat` property. The entry will have the `modelBlobId`
 property, which alongside `organizationSlug`, `workspaceSlug`, and `productUuid`, is sufficient
 to construct the links.
 
-<!-- embedme live-public/main.js#L13-L20 -->
+<!-- embedme live-public/main.js#L14-L21 -->
 ```js
-const models = response.asset.models;
+const models = product.response.asset.models;
 const getModelURL = format => {
   const id = models.find(model => model.conversionFormat === format).modelBlobId;
   return `${baseUrl}/assets/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}/${id}`;
@@ -155,24 +156,24 @@ set through QR buttons `url` property. The QR URL we construct is the embed link
 automatically loads the AR.
 
 
-<!-- embedme live-public/main.js#L22-L23 -->
+<!-- embedme live-public/main.js#L23-L24 -->
 ```js
 const poster = `${baseUrl}/assets/thumbnail/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}/`;
 const qrUrl = `https://embed.vntana.com?productUuid=${productUuid}&clientSlug=${workspaceSlug}&organizationSlug=${organizationSlug}&autoAR=true`;
 ```
 
 The last piece of information left to obtain are viewer properties like `toneMapping`,
-`fieldOfView`, etc. They are stored as stringified JSON in the `response.viewerSettings.config`.
+`fieldOfView`, etc. They are stored as stringified JSON in the `product.response.viewerSettings.config`.
 
-<!-- embedme live-public/main.js#L25-L25 -->
+<!-- embedme live-public/main.js#L26-L26 -->
 ```js
-const viewerConfig = JSON.parse(response.viewerSettings.config);
+const viewerConfig = JSON.parse(product.response.viewerSettings.config);
 ```
 
 It remains to pass model links and other properties to the viewer, and to pass the `qrURL`
 to the QR button.
 
-<!-- embedme live-public/main.js#L27-L36 -->
+<!-- embedme live-public/main.js#L28-L37 -->
 ```js
 const viewer = document.querySelector("vntana-viewer");
 Object.assign(viewer, viewerConfig);
@@ -318,51 +319,103 @@ Object.assign(viewer, {
 
 ## Hotspots
 
-The `hotspots` example covers the creation of hotspots using the `vntana-hotspot` custom HTML element. The `hotspots` directory contains 
-`index.html` and `hotspots.js`. The demo is created as a simple example where hotspot data is pulled on page load and each hotspot is appended
-to the `vntana-viewer` element.
+This example extends the `live-public` demo by fetching hotspot data from the Platform,
+creating hotspot elements, and appending them to the viewer. Each hotspot is represented by 
+a `<vntana-hotspot>` element, which marks a point on the 3D model that moves
+with the camera. 
 
-When working with the `vntana-hotspot` element, it is important first to understand what it is and what it isn't. The `vntana-hotspot` element itself 
-largely just exists as a point within the viewer, typically on the model. It contains `position` and `normal` attributes which are used to
-update where in the viewer/on the model the hotspot exists, as well as when it is determined to be *behind* the model. Out of the box, a `vntana-hotspot` has
-no visual representation, however the element itself can be styled as you see fit. To create a cicular pin for it you can use the styling:
+Main hotspot properties are:
+- `position`: defines where the hotspot is located in the scene.
+- `normal`: determines whether the hotspot is in front or behind the model, based on the camera
+position. When behind the model, hotspot elements automatically get the `hide` class added.
 
-```css
-vntana-hotspot {
-  background-color: #4b61f9; 
-  border: 2px solid white; 
-  color: white; 
-  border-radius: 50%; 
-  width: 26px; 
-  height: 26px;
-  display: flex; 
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  cursor: pointer;
+These values are typically generated in the Platform's Editor,
+since they can be difficult to define manually. The Platform may additionally store the camera
+data that is applied when the hotspot is clicked.
+
+By default, `<vntana-hotspot>` elements don't have any content or styling applied; you can
+style them freely with CSS and add any HTML inside the element tags.
+
+Styles provided in `shared/styles/hotspots.css` make hotspot elements circular pins, and hide
+their content by default. The content is displayed only once the hotspot gets clicked, in which
+case we set the `open` class on the hotspot element.
+When positioned behind the model, hotspots are made transparent and interaction is disabled.
+
+**NOTE:** `<vntana-hotspot>` elements are not displayed until the model is loaded, so 
+they can be safely appended to the viewer at any time.
+
+The code in `main.js` begins with loading the product data, identical to the `live-public`
+demo, and then fetches hotspot data from the Platform. The hotspot endpoint returns paged results,
+so the request must include `page` and `size`. For simplicity, this demo assumes the number of 
+hotspots is less than 100.
+
+<!-- embedme hotspots/main.js#L29-L41 -->
+```js
+const hotspotEndpoint = `/hotspots/search/organizations/${organizationSlug}/clients/${workspaceSlug}`;
+const hotspotRequest = fetch(`${baseUrl}${hotspotEndpoint}`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    page: 1,
+    size: 100,
+    productUuid,
+  }),
+});
+const hotspots = await hotspotRequest.then(response => response.json());
+```
+
+Hotspot entries are found in the `hotspots.response.grid` array. Each entry has the shape:
+```json
+{
+  "config": {
+    "dimensions": "<stringified JSON>", // contains "position" and "normal"
+    "camera": "<stringified JSON>",     // optional camera settings
+  },
+  "text": "<HTML content string>",      // HTML content
+  "type": "TEXT",
 }
 ```
-This will create a similar style pin as what is in VNTANA embed links, without the number in the middle. Additional styling can be added for the `hide` class on
-the `vntana-hotspot` element which is toggled when the viewer uses the `normal` to determine whether it is *behind* the model or not.
-```css
-vntana-hotspot.hide {
-    opacity: 50%;
-    pointer-events: none;
-}
+
+Besides text, the Platform also supports image and video hotspots, though this demo 
+assumes that is not the case.
+
+The next step is to create `<vntana-hotspot>` elements for each entry and append it to the
+viewer through the following steps: 
+1. Extract `position`, `normal`, and (optionally) `camera` data from the hotspot data.
+2. Create the element and set its position, normal, and content.
+3. Add a click handler that toggles the `open` class. If camera data is included, it is applied
+when the hotspot is opened.
+
+<!-- embedme hotspots/main.js#L49-L72 -->
+```js
+hotspots.response.grid.forEach(data => {
+  const dimensions = JSON.parse(data.config.dimensions);
+  const camera = data.config.camera ? JSON.parse(data.config.camera) : null;
+
+  const hotspot = document.createElement("vntana-hotspot");
+  hotspot.position = dimensions.position;
+  hotspot.normal = dimensions.normal;
+  hotspot.innerHTML = `<div class="content">${data.text}</div>`;
+
+  hotspot.addEventListener("click", event => {
+    if (event.target !== hotspot) {
+      return;
+    }
+
+    const isOpen = hotspot.classList.contains("open");
+    hotspot.classList.toggle("open");
+
+    if (camera && !isOpen) {
+      viewer.setCameraRotation(camera.cameraRotation)
+      viewer.setCameraDistance(camera.cameraDistance)
+      viewer.setCameraTarget(camera.cameraTarget)
+      viewer.setFieldOfView(camera.fieldOfView)
+      viewer.setOrthographicSize(camera.orthographicSize)
+    }
 ```
-We disable mouse interactions when `hide` is present, however this is not necessary.
 
-To actually add hotspots, we first need to retrieve their data. In the demo, this is just done by pulling from memory, however the method
-`requestHotspotData` on line 21 should be viewed as a placeholder for the method needed in your implementation to pull the data. This can be handled
-by requesting it from a database via methods such as HTTP calls, reading from a file, or pulling from memory. 
-
-On lines `24-27`, we will iterate over each hotspot returned and create their corresponding `vntana-hotspot` element, before appending to the 
-viewer. The expected hotspot data should have values for the `position` and `normal` for each needed hotspot, at a minimum. These values will be 
-`positions` consisting of three values and their units, such as `0m 0m 0m`. In addition to this info, you could also have:
-- `Camera Settings`: these can be utilized with an on-click event handler for the `vntana-hotspot` to update the camera to a specific place for hotspot.
-- `Details`: This is vague, but can be any content you can place as a child of the `vntana-hotspot`. In this demo, we just create a `div` to house some text.
-- `uuid`: It is recommended to generate `uuid`'s for your hotspots so you can sync them with your models and any pre-existing database entities intended to be displayed in the hotspot. This assumes you are not retrieving hotspots from the VNTANA Platform via the API.
-
-In `hotspots.js` the process of creating each individual hotspot occurs on lines `34-70`. First, on line `36` the `vntana-hotspot` element is created and the `position` and `normal` attributes are set. Then, on line `41` a `div` is created which will be house the information we wish to display when the hotspot is clicked, which will be appended to the `vntana-hotspot` as a child. A `p` element is created on line `46` housing the text for that hotspot and appended to the `div`. These steps are dependent on if and how you wish to hae extra info displayed when a hotspot is clicked. It can also be displayed on a side panel in which case you would not append these as children to the `vntana-hotspot`.
-
-Finally, we add some `click` listeners to the hotspot. On lines `51-55` we add a listener for when the hotspot is clicked which toggles the `hidden` class to show or display the intended info for the hotspot. Additionally, if the hotspot had `camera` data, we call the `moveCamera` method to update camera settings. On lines `57-67` we add `mousedown` and `mouseup` events to handle ensuring that when a hotspot's content is visible, and you click elsewhere, the hotspot panel is hidden once more, similar to the behavior on the VNTANA Platform.
+**NOTE:** Hotspot data doesn't have to come from the Platform. It can also be stored locally or
+in another database, as long as `position`, `normal`, content, and (optionally) camera data
+are provided.
