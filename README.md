@@ -78,6 +78,9 @@ Each of the subsequent sections outlines the code in `main.js` of the correspond
 
 ## Live Public
 
+This example demonstrates how to fetch data about a Live Public product from the Platform,
+prepare it, and pass it to the viewer.
+
 Products in the Platform are determined by their `organizationSlug`, `workspaceSlug`, and
 `productUuid`. These can be obtained from Platform links, which are of the form
 ```js
@@ -148,7 +151,7 @@ In addition to the GLB and USDZ links, we will also set up the poster, an image 
 displayed in the viewer while the model is loading, and the QR link, which will be encoded 
 in the QR code displayed when the QR button is clicked. The poster is set through viewer's
 `poster` property and can be constructed from `asset.thumbnailBlobId`, while QR link is
-set through QR buttons `url` property. The QR URL we construct is just the embed link which
+set through QR buttons `url` property. The QR URL we construct is the embed link which
 automatically loads the AR.
 
 
@@ -166,7 +169,7 @@ The last piece of information left to obtain are viewer properties like `toneMap
 const viewerConfig = JSON.parse(response.viewerSettings.config);
 ```
 
-It remains to pass the viewer config, model links, and poster link to the viewer, and to pass the `qrURL`
+It remains to pass model links and other properties to the viewer, and to pass the `qrURL`
 to the QR button.
 
 <!-- embedme live-public/main.js#L27-L36 -->
@@ -189,56 +192,129 @@ This example demonstrates how to load product data from VNTANA Platform for prod
 which are not publicly available. This requires the product to be in a Live Internal state,
 and the user will first need to log in to the Platform. The example won't work
 out-of-the-box, since the user should first input their email and password, as well as 
-organization and workspace slug, before proceeding. 
-Directory `live-internal` contains files `index.html` and `platform.js`, latter containing
-the `Platform` class. The purpose of this class is to abstract away the details of VNTANA API, as well
-as to keep track of tokens needed for authentication into organizations and workspaces. A detailed
-description of Platform's authentication flow can be found [here](https://www.vntana.com/resource/api-authentication/).
+organization slug, workspace slug, and product UUID before proceeding. A detailed description
+of Platform's authentication flow can be found [here](https://www.vntana.com/resource/api-authentication/).
 
-The class provides the following methods (wrappers around other endpoints could be easily added):
+To simplify making endpoint calls, we use the `request` function available from `request.js`.
+The function prepends the API base URL to endpoint URLs, keeps track of the authentication
+token, and returns the `response` object obtained from the endpoint call.
+```js
+async function request(endpoint, method, headers, body)
+```
 
-  - `login(email, password)` - (async) logs the user into the platform with email and password.
-  - `loginToken(token)` - (async) logs the user into the platform with the authentication token obtained from VNTANA Platform.
-  - `refreshToken(organizationUuid, workspaceUuid)` - (async) refreshes the token when changing organization or workspace. Exactly one of the parameters must be `undefined`.
-  - `getOrganization()` - (async) returns an array of objects, each representing a different organization accessible to the user.
-  - `getWorkspaces()` - (async) returns an array of objects, each representing a different workspace accessible to the user within the current organization.
-  - `getProduct(uuid)` - (async) returns data about the product with the given `uuid`.
-  - `getModelURL(workspaceUuid, productUuid)` - returns the URL of the GLB file associated with the product. 
-  - `getHeaders()` - returns an object with `header-value` pairs needed for downloading models.
+We start by importing the `request` function, `baseURL`, and `token` from the `request.js`,
+as well as the `VntanaViewer` class from the viewer bundle. 
 
-In line `17` we import the `Platform` class from `platform.js`, and in line `18` we import
-the `VntanaViewer` class from the viewer build. We will need the `VntanaViewer` class to set the
-appropriate headers needed for model downloads.
+<!-- embedme live-internal/main.js#L1-L2 -->
+```js
+import {request, baseURL, token} from './request.js';
+import {VntanaViewer} from "https://cdn.jsdelivr.net/npm/@vntana/viewer/dist/bundle.js";
+```
 
-Lines `19-24` specify data the user should input. `email` and `password` are the ones
-used to log in to the VNTANA Platform (and could be replaced by authentication token). `organizationSlug`
-and `workspaceSlug` are used here primarily to easily determine organization and workspace UUIDs within
-which the product resides, and should probably be removed in production code.
+In order to log into the Platform, the user needs to provide their email and password.
+Products in the Platform are determined by their organization slug, workspace slug, and
+product UUID, so we need to specify those as well.
 
-In line `27` we instantiate the `Platform` class which we will use to call platform endpoints,
-and log in to the platform in line `28`. Lines `30-35` fetch the list of all available organizations,
-and search the list for the organization whose `organizationSlug` we set beforehand. In lines `32-35`
-we obtain the UUID of our organization and the user's role within it. Line `37` performs authentication into the organization. 
+<!-- embedme live-internal/main.js#L4-L8 -->
+```js
+const email = "<username>";
+const password = "<password>";
+const organizationSlug = "<organization-slug>";
+const workspaceSlug = "<workspace-slug>";
+const productUuid = "<product-uuid>";
+```
 
-Lines `39-43` repeat the same steps for the workspace, the only difference
-being that we ignored the user's role in the workspace.  Lines `45-47` authenticate the user into the workspace. Organization owners and admins must not
-perform this step, since they are already authenticated into all workspaces within their organization.
+We proceed to log into the Platform with the email and password.
 
-In line `49` we finally fetch the data associated with the product. Viewer-related properties
-are stored as JSON string within `product.viewerSettings.config` property, and obtain the URL of the model in line `51`.
+<!-- embedme live-internal/main.js#L10-L10 -->
+```js
+await request("/auth/login", "POST", {}, {email, password});
+```
 
-Before passing the data to the viewer, we must ensure the viewer uses correct access headers
-when downloading the model. In order to so, we obtain these headers through a call to `platform.getHeaders()`
-and pass them to the static method `setModelRequestHeader` of `VntanaViewer` class. These headers
-can be used for all subsequent downloads as long we don't change the organization or workspace.
+To fetch product data we first need to determine UUIDs of the organization and workspace
+to which it belongs. We start by fetching the list of all organizations available to the
+user, and searching it for the one whose `slug` equals the `organizationSlug` set above.
+We also extract the user's role in the organization from the `role` property.
 
-Lines `55-64` merge all the viewer properties into one object, which are then passed to the
-viewer in the same way we did in the last example.
+<!-- embedme live-internal/main.js#L12-L22 -->
+```js
+const organizations = (await request("/organizations", "GET")).grid;
+const organization = organizations.find(org => org.slug === organizationSlug);
 
-**NOTE:** The `Platform` class also provides the `getPresets(workspaceUuid)` method which returns
-an array of all available presets within the organization (or workspace if `workspaceUuid` is provided).
-Each entry in the array contains the `config` property whose value is JSON string of viewer settings. 
-This settings can be used as other viewer settings we encountered in the examples.
+if (!organization) {
+  throw new Error(`Organization ${organizationSlug} not found`);
+}
+
+const {
+  role: organizationRole,
+  uuid: organizationUuid,
+} = organization;
+```
+
+To access data about the organization, like the list of all workspaces, we need to refresh the 
+authentication token:
+
+<!-- embedme live-internal/main.js#L24-L24 -->
+```js
+await request("/auth/refresh-token", "GET", {organizationUuid});
+```
+
+We can now fetch the list of workspaces available to the user in the organization, and search it for the one
+whose `slug` equals `workspaceSlug`. We only need the `uuid` of the workspace we intend to use.
+
+<!-- embedme live-internal/main.js#L26-L35 -->
+```js
+const workspaces = (await request("/clients/client-organizations", "GET")).grid;
+const workspace = workspaces.find(workspace => workspace.slug === workspaceSlug);
+
+if (!workspace) {
+  throw new Error(`Workspace ${workspaceSlug} not found`);
+}
+
+const {
+  uuid: workspaceUuid,
+} = workspace;
+```
+
+To finish the login process, we need to refresh the authentication token for the workspace, but only
+if the user is not an organization owner or organization admin.
+
+<!-- embedme live-internal/main.js#L37-L39 -->
+```js
+if (organizationRole !== "ORGANIZATION_OWNER" && organizationRole !== "ORGANIZATION_ADMIN") {
+  await request("/auth/refresh-token", "GET", {clientUuid: workspaceUuid});
+}
+```
+
+The login process is done, and we can focus on loading the product data. The product data
+returned by the endpoint has the same structure as the one in the `live-public` demo.
+
+<!-- embedme live-internal/main.js#L41-L43 -->
+```js
+const response = await request(`/products/${productUuid}`, "GET");
+const src = `${baseURL}/products/${productUuid}/download/model?clientUuid=${workspaceUuid}&conversionFormat=GLB`;
+const viewerConfig = JSON.parse(response.viewerSettings.config);
+```
+
+In order to download the model, the viewer will need to use authentication headers, which we 
+set on the `VntanaViewer` class.
+
+<!-- embedme live-internal/main.js#L45-L47 -->
+```js
+VntanaViewer.setModelRequestHeaders({
+  "X-AUTH-TOKEN": `Bearer ${token}`,
+});
+```
+It remains to pass viewer properties and model link to the viewer.
+
+<!-- embedme live-internal/main.js#L49-L53 -->
+```js
+const viewer = document.querySelector("vntana-viewer");
+Object.assign(viewer, viewerConfig);
+Object.assign(viewer, {
+  src,
+});
+```
 
 ## Hotspots
 
