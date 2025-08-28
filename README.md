@@ -1,245 +1,421 @@
-# VNTANA Viewer
+# VNTANA Viewer Integration Demos
 
-## Contents
-* [Attributes and Properties](./docs/attributes.md)
+This package contains several demos describing how to fetch 3D model data
+from the VNTANA Platform and pass it to the `<vntana-viewer>` element.
 
-* [UI Buttons](./docs/ui.md)
+## Table of Contents
+- [Getting Started](#getting-started)
+- [Common Code](#common-code)
+- [Live Public](#live-public)
+- [Live Internal](#live-internal)
+- [Hotspots](#hotspots)
 
-* [Events](./docs/events.md)
+## Getting Started
 
-* [Hotspots](./docs/hotspots.md)
-
-
-## Introduction
-VNTANA Viewer is a custom web component for rendering glTF/GLB files in the browser. As a web component
-it can be placed, styled, and manipulated like any standard HTML element in the web page, while multiple
-options allow fine-grained customization of the 3D experience.
-
-The `<vntana-viewer>` element definition can be loaded through either an ES or UMD standalone modules from 
-the following links:
+To start a demo, run:
+```bash
+npm run <demo-name>
 ```
-https://viewer-build.vntana.com/v2.0.0/viewer.min.js
-https://viewer-build.vntana.com/v2.0.0/viewer.umd.min.js
-```
+This will run a local server and open the demo in your default browser.
+Scripts require no prior installation. 
 
-Once the element definition is loaded, in order to load the model `DamagedHelmet.glb` with environment map `Neutral.hdr`, for example, it suffices to 
-specify the corresponding attributes on the element:
+<div align="center">
 
-```
-<html>
-  <head>
-    <script src="https://viewer-build.vntana.com/v2.0.0/viewer.min.js"></script>
-  </head>
-  <body>
-    <vntana-viewer src="DamagedHelmet.glb" environment-src="Neutral.hdr">
-    </vntana-viewer>
-  </body>
-</html>
-```
+| Demo                              |  Description                                                         |  
+|:---------------------------------:|----------------------------------------------------------------------|
+|[`live-public`](#live-public)      |  Loads the `Live Public` product data from VNTANA Platform           | 
+|[`live-internal`](#live-internal)  |  Loads the `Live Internal` product data with user authentication     |
+|[`hotspots`](#hotspots)            |  Loads the local asset and creates hotspots from local data          |
 
+</div>
 
-## Use Cases
-This package comes with three scripts, each demonstrating different aspects of the viewer:
+For basic usage and full documentation of the `<vntana-viewer>` component,
+visit the [Viewer NPM Page](https://www.npmjs.com/package/@vntana/viewer).
+Bundled code of the viewer package is available through [UNPKG](https://unpkg.com) or [jsDelivr](https://jsdelivr.com)
+as `bundle.js` (ESM) or `bundle.umd.js` (UMD).
 
-- `simple` - adds the viewer to a web page, and sets it up to display a 3d model with the environment map through the attribute interface,
-- `integration` - fetches data from VNTANA Platform and applies it to the viewer through the property interface,
-- `internal` - similar to `integration`, but loads data for Live Internal model instead of Live Public.
-- `hotspots` - built off the `simple` solution, this loads a local asset and pulls hotspot data from memory to create generic hotspots.
+## Common Code
+Files for each demo can be found in the directory of the same name. Each directory contains files:
+- `index.html`: main content of the page,
+- `main.js`: fetching data and assigning it to the elements.
 
-The accompanying `npm` package doesn't need any prior installation. In order to run the scripts it suffices
-to execute `npm run simple` or `npm run integration` from the package’s root directory. Both scripts run the `http-server` and open the corresponding page in the browser.
-
-All examples utilize the styles in the shared directory:
-
-- `style.css` - styles used for this demo,
-- `viewer.css` - default styles for the viewer and positioning of buttons.
-
-### Simple Example
-
-Directory simple contains the `index.html` containing the page's HTML code, the `chair.glb` model, and `Neutral.hdr` environment map. The body of the document is:
-
+File `index.html` has roughly the same structure in all demos:
 ```html
-  <body>
-    <script type="module" src="https://viewer-build.vntana.com/v2.0.0/viewer.min.js"></script>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="../shared/styles/viewer.css" />
+  <link rel="stylesheet" href="../shared/styles/style.css" />
+</head>
 
-    <vntana-viewer src="chair.glb" environment-src="Neutral.hdr" tone-mapping="neutral">
-      <vntana-fs-button></vntana-fs-button>
-    </vntana-viewer>
-  </body>
-```
+<body>
+  <script 
+    type="module" 
+    src="https://cdn.jsdelivr.net/npm/@vntana/viewer/dist/bundle.js"
+  ></script>
 
-Line `2` loads the ES module containing the viewer. Line `4` adds the viewer elements, sets the model through the `src` attribute and environment through `environment-src`. We also added the `tone-mapping` attribute to improve the lighting experience. `<vntana-fs-button>` is added as a child of the viewer, and toggles the viewer’s fullscreen state when clicked.
-
-### Integration Example
-
-Directory `integration` contains two files: `index.html` with HTML code for the page, and `platform.js` containing the function `getPlatformData`, which we will use to fetch the product data from VNTANA Platform.
-
-**NOTE**: Function `getPlatformData` only works with products in `Live Public` state.
-
-The first part of the page’s body loads the viewer with different buttons:
-```html
   <vntana-viewer>
-    <vntana-fs-button></vntana-fs-button>
-    <vntana-qr-button class="expandable"></vntana-qr-button>
-    <vntana-ar-button></vntana-ar-button>
-    <vntana-center-button></vntana-center-button>
-    <div class="button-container zoom-buttons">
-      <vntana-zoom-in-button></vntana-zoom-in-button>
-      <vntana-zoom-out-button></vntana-zoom-out-button>
-    </div>
+      <!--- buttons -->
   </vntana-viewer>
-```
-Classes `button-container`, `zoom-buttons`, and `expandable` come as part of viewer’s default styling, and are defined in `viewer.css`. Elements `<vntana-qr-button>` and `<vntana-ar-button>` are mutually exclusive, so at most one of them will be visible at any time. Unless we provide the URL that will be encoded in the QR, `<vntana-qr-button>` won’t be visible.
 
-Second part of the body handles the main purpose of this demo - loading data from VNTANA Platform. We start by importing the `getPlatformData` function from file `platform.js`.
+  <script type="module" src="main.js"></script>
+</body>
+```
+
+Inside the document's `<head>` we set the page viewport and load two stylesheets:
+- `viewer.css`: default styles for the viewer and button positioning,
+- `style.css`: custom demo styles.
+
+**NOTE:** Setting page viewport is required for proper scaling of the viewer on mobile devices.
+
+The `<body>` element starts with loading the viewer code script. This script defines `<vntana-viewer>`
+and all components (hotspots, buttons, ...). We continue by adding the `<vntana-viewer>` element
+to the page and place different buttons as its children. All buttons work out-of-the-box,
+except for the QR button which requires we pass it the URL that will be encoded in the QR code.
+Finally, we load the page logic from `main.js` with the `<script>` element.
+
+Each of the subsequent sections outlines the code in `main.js` of the corresponding demo.
+
+
+## Live Public
+
+This example demonstrates how to fetch data about a Live Public product from the Platform,
+prepare it, and pass it to the viewer.
+
+Products in the Platform are determined by their `organizationSlug`, `workspaceSlug`, and
+`productUuid`. These can be obtained from Platform links, which are of the form
 ```js
-  <script type="module">
-    import {getPlatformData} from './platform.js';
-
-    const platformData = await getPlatformData(
-      "asset-library",
-      "furniture",
-      "85a51c7b-07c1-4143-bd56-aa2a43acaa42"
-    );
-
-    const config = {
-      src: platformData.src,
-      usdzSrc: platformData.usdzSrc,
-      poster: platformData.poster,
-      ...platformData.config,
-    };
-
-    const viewer = document.querySelector("vntana-viewer");
-
-    Object.assign(viewer, config);
-
-    const qrButton = viewer.querySelector("vntana-qr-button");
-    qrButton.url = platformData.qrUrl;
-  </script>
+platform.vntana.com/<organizationSlug>/<workspaceSlug>/products/edit/<productUuid>
 ```
 
-The `getPlatformData` function accepts three parameters: `organizationSlug`, `clientSlug`, and `productUuid`. All three parameters can be easily obtained from VNTANA Platform links, since all platform links are of the form:
-
+In this demo we use the product:
+<!-- embedme live-public/main.js#L1-L3 -->
+```js
+const organizationSlug = "asset-library";
+const workspaceSlug = "viewer-demo";
+const productUuid = "db656517-2842-4e64-a3de-743acee9ff9d";
 ```
-https://platform.vntana.com/<organizationSlug>/<clientSlug>/products/edit/<productUuid>
+
+The endpoint used to fetch product data returns a JSON object with properties
+`success`, `response`, and `errors`.  If the product is available, `success` will 
+be set to `true`, `errors` array will be empty, and `response` will be an object
+with data we need to construct model links and set up the viewer.
+
+<!-- embedme live-public/main.js#L5-L8 -->
+```js
+const baseUrl = `https://api.vntana.com`;
+const productEndpoint = `/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}`
+const productRequest = fetch(`${baseUrl}${productEndpoint}`);
+const product = await productRequest.then(response => response.json());
 ```
 
-The function returns an object with the following properties:
+The `product.response` object is of the form (with irrelevant data omitted):
+```json
+{
+  "asset": {
+    "thumbnailBlobId": "<blob-id>",
+    "models": [
+      {
+        "conversionFormat": "GLB",
+        "modelBlobId": "<blob-id>",
+      },
+      {
+        "conversionFormat": "USDZ",
+        "modelBlobId": "<blob-id>",
+      },
+    ]
+  },
+  "viewerSettings": {
+    "config": "<stringified JSON>",
+  },
+}
+```
+The viewer loads and renders GLB models specified through its `src` property. The USDZ
+model, necessary for native AR experience on Safari devices, is specified through the `usdzSrc`
+property. To obtain the links to these models, we search the `product.response.asset.models` array
+for entries with the corresponding `conversionFormat` property. The entry will have the `modelBlobId`
+property, which alongside `organizationSlug`, `workspaceSlug`, and `productUuid`, is sufficient
+to construct the links.
 
-- `src` - URL of the GLB model,
-- `usdzSrc` - URL of the USDZ model,
-- `poster` - URL of the poster/thumbnail,
-- `qrUrl` - URL of the product’s embed link with autoAR enabled,
-- `config` - config data for the viewer without links.
+<!-- embedme live-public/main.js#L14-L21 -->
+```js
+const models = product.response.asset.models;
+const getModelURL = format => {
+  const id = models.find(model => model.conversionFormat === format).modelBlobId;
+  return `${baseUrl}/assets/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}/${id}`;
+}
 
-The `qrUrl` should in almost all cases be replaced with a different URL for custom integrations. After obtaining the platform data in lines `4-8`. In lines `10-15` we merge all the data into one config containing a list of `(key,value)` pairs that will be passed to the viewer. In line `17` we obtain a reference to the viewer, and call `Object.assign` on it with the config in line `19`. We obtain the reference to the `<vntana-qr-button>` in line `21`, and pass it the `qrUrl` string.
+const src = getModelURL("GLB");
+const usdzSrc = getModelURL("USDZ");
+```
+
+In addition to the GLB and USDZ links, we will also set up the poster, an image which is 
+displayed in the viewer while the model is loading, and the QR link, which will be encoded 
+in the QR code displayed when the QR button is clicked. The poster is set through viewer's
+`poster` property and can be constructed from `asset.thumbnailBlobId`, while QR link is
+set through QR buttons `url` property. The QR URL we construct is the embed link which
+automatically loads the AR.
 
 
-### Internal Example
+<!-- embedme live-public/main.js#L23-L24 -->
+```js
+const poster = `${baseUrl}/assets/thumbnail/products/${productUuid}/organizations/${organizationSlug}/clients/${workspaceSlug}/`;
+const qrUrl = `https://embed.vntana.com?productUuid=${productUuid}&clientSlug=${workspaceSlug}&organizationSlug=${organizationSlug}&autoAR=true`;
+```
+
+The last piece of information left to obtain are viewer properties like `toneMapping`,
+`fieldOfView`, etc. They are stored as stringified JSON in the `product.response.viewerSettings.config`.
+
+<!-- embedme live-public/main.js#L26-L26 -->
+```js
+const viewerConfig = JSON.parse(product.response.viewerSettings.config);
+```
+
+It remains to pass model links and other properties to the viewer, and to pass the `qrURL`
+to the QR button.
+
+<!-- embedme live-public/main.js#L28-L37 -->
+```js
+const viewer = document.querySelector("vntana-viewer");
+Object.assign(viewer, viewerConfig);
+Object.assign(viewer, {
+  src,
+  usdzSrc,
+  poster,
+});
+
+const qrButton = viewer.querySelector("vntana-qr-button");
+qrButton.url = qrUrl;
+```
+
+## Live Internal
 
 This example demonstrates how to load product data from VNTANA Platform for products
 which are not publicly available. This requires the product to be in a Live Internal state,
 and the user will first need to log in to the Platform. The example won't work
 out-of-the-box, since the user should first input their email and password, as well as 
-organization and workspace slug, before proceeding. 
+organization slug, workspace slug, and product UUID before proceeding. A detailed description
+of Platform's authentication flow can be found [here](https://www.vntana.com/resource/api-authentication/).
 
-Directory `internal` contains files `index.html` and `platform.js`, latter containing
-the `Platform` class. The purpose of this class is to abstract away the details of VNTANA API, as well
-as to keep track of tokens needed for authentication into organizations and workspaces. A detailed
-description of Platform's authentication flow can be found [here](https://www.vntana.com/resource/api-authentication/).
+To simplify making endpoint calls, we use the `request` function available from `request.js`.
+The function prepends the API base URL to endpoint URLs, keeps track of the authentication
+token, and returns the `response` object obtained from the endpoint call.
+```js
+async function request(endpoint, method, headers, body)
+```
 
-The class provides the following methods (wrappers around other endpoints could be easily added):
+We start by importing the `request` function, `baseURL`, and `token` from the `request.js`,
+as well as the `VntanaViewer` class from the viewer bundle. 
 
-  - `login(email, password)` - (async) logs the user into the platform with email and password.
-  - `loginToken(token)` - (async) logs the user into the platform with the authentication token obtained from VNTANA Platform.
-  - `refreshToken(organizationUuid, workspaceUuid)` - (async) refreshes the token when changing organization or workspace. Exactly one of the parameters must be `undefined`.
-  - `getOrganization()` - (async) returns an array of objects, each representing a different organization accessible to the user.
-  - `getWorkspaces()` - (async) returns an array of objects, each representing a different workspace accessible to the user within the current organization.
-  - `getProduct(uuid)` - (async) returns data about the product with the given `uuid`.
-  - `getModelURL(workspaceUuid, productUuid)` - returns the URL of the GLB file associated with the product. 
-  - `getHeaders()` - returns an object with `header-value` pairs needed for downloading models.
+<!-- embedme live-internal/main.js#L1-L2 -->
+```js
+import {request, baseURL, token} from './request.js';
+import {VntanaViewer} from "https://cdn.jsdelivr.net/npm/@vntana/viewer/dist/bundle.js";
+```
 
-In line `17` we import the `Platform` class from `platform.js`, and in line `18` we import
-the `VntanaViewer` class from the viewer build. We will need the `VntanaViewer` class to set the
-appropriate headers needed for model downloads.
+In order to log into the Platform, the user needs to provide their email and password.
+Products in the Platform are determined by their organization slug, workspace slug, and
+product UUID, so we need to specify those as well.
 
-Lines `19-24` specify data the user should input. `email` and `password` are the ones
-used to log in to the VNTANA Platform (and could be replaced by authentication token). `organizationSlug`
-and `workspaceSlug` are used here primarily to easily determine organization and workspace UUIDs within
-which the product resides, and should probably be removed in production code.
+<!-- embedme live-internal/main.js#L4-L8 -->
+```js
+const email = "<username>";
+const password = "<password>";
+const organizationSlug = "<organization-slug>";
+const workspaceSlug = "<workspace-slug>";
+const productUuid = "<product-uuid>";
+```
 
-In line `27` we instantiate the `Platform` class which we will use to call platform endpoints,
-and log in to the platform in line `28`. Lines `30-35` fetch the list of all available organizations,
-and search the list for the organization whose `organizationSlug` we set beforehand. In lines `32-35`
-we obtain the UUID of our organization and the user's role within it. Line `37` performs authentication into the organization. 
+We proceed to log into the Platform with the email and password.
 
-Lines `39-43` repeat the same steps for the workspace, the only difference
-being that we ignored the user's role in the workspace.  Lines `45-47` authenticate the user into the workspace. Organization owners and admins must not
-perform this step, since they are already authenticated into all workspaces within their organization.
+<!-- embedme live-internal/main.js#L10-L10 -->
+```js
+await request("/auth/login", "POST", {}, {email, password});
+```
 
-In line `49` we finally fetch the data associated with the product. Viewer-related properties
-are stored as JSON string within `product.viewerSettings.config` property, and obtain the URL of the model in line `51`.
+To fetch product data we first need to determine UUIDs of the organization and workspace
+to which it belongs. We start by fetching the list of all organizations available to the
+user, and searching it for the one whose `slug` equals the `organizationSlug` set above.
+We also extract the user's role in the organization from the `role` property.
 
-Before passing the data to the viewer, we must ensure the viewer uses correct access headers
-when downloading the model. In order to so, we obtain these headers through a call to `platform.getHeaders()`
-and pass them to the static method `setModelRequestHeader` of `VntanaViewer` class. These headers
-can be used for all subsequent downloads as long we don't change the organization or workspace.
+<!-- embedme live-internal/main.js#L12-L22 -->
+```js
+const organizations = (await request("/organizations", "GET")).grid;
+const organization = organizations.find(org => org.slug === organizationSlug);
 
-Lines `55-64` merge all the viewer properties into one object, which are then passed to the
-viewer in the same way we did in the last example.
+if (!organization) {
+  throw new Error(`Organization ${organizationSlug} not found`);
+}
 
-**NOTE:** The `Platform` class also provides the `getPresets(workspaceUuid)` method which returns
-an array of all available presets within the organization (or workspace if `workspaceUuid` is provided).
-Each entry in the array contains the `config` property whose value is JSON string of viewer settings. 
-This settings can be used as other viewer settings we encountered in the examples.
+const {
+  role: organizationRole,
+  uuid: organizationUuid,
+} = organization;
+```
 
-### Hotspots Example
+To access data about the organization, like the list of all workspaces, we need to refresh the 
+authentication token:
 
-The `hotspots` example covers the creation of hotspots using the `vntana-hotspot` custom HTML element. The `hotspots` directory contains 
-`index.html` and `hotspots.js`. The demo is created as a simple example where hotspot data is pulled on page load and each hotspot is appended
-to the `vntana-viewer` element.
+<!-- embedme live-internal/main.js#L24-L24 -->
+```js
+await request("/auth/refresh-token", "GET", {organizationUuid});
+```
 
-When working with the `vntana-hotspot` element, it is important first to understand what it is and what it isn't. The `vntana-hotspot` element itself 
-largely just exists as a point within the viewer, typically on the model. It contains `position` and `normal` attributes which are used to
-update where in the viewer/on the model the hotspot exists, as well as when it is determined to be *behind* the model. Out of the box, a `vntana-hotspot` has
-no visual representation, however the element itself can be styled as you see fit. To create a cicular pin for it you can use the styling:
+We can now fetch the list of workspaces available to the user in the organization, and search it for the one
+whose `slug` equals `workspaceSlug`. We only need the `uuid` of the workspace we intend to use.
 
-```css
-vntana-hotspot {
-    background-color: #4b61f9; 
-    border: 2px solid white; 
-    color: white; 
-    border-radius: 50%; 
-    width: 26px; 
-    height: 26px;
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
+<!-- embedme live-internal/main.js#L26-L35 -->
+```js
+const workspaces = (await request("/clients/client-organizations", "GET")).grid;
+const workspace = workspaces.find(workspace => workspace.slug === workspaceSlug);
+
+if (!workspace) {
+  throw new Error(`Workspace ${workspaceSlug} not found`);
+}
+
+const {
+  uuid: workspaceUuid,
+} = workspace;
+```
+
+To finish the login process, we need to refresh the authentication token for the workspace, but only
+if the user is not an organization owner or organization admin.
+
+<!-- embedme live-internal/main.js#L37-L39 -->
+```js
+if (organizationRole !== "ORGANIZATION_OWNER" && organizationRole !== "ORGANIZATION_ADMIN") {
+  await request("/auth/refresh-token", "GET", {clientUuid: workspaceUuid});
 }
 ```
-This will create a similar style pin as what is in VNTANA embed links, without the number in the middle. Additional styling can be added for the `hide` class on
-the `vntana-hotspot` element which is toggled when the viewer uses the `normal` to determine whether it is *behind* the model or not.
-```css
-vntana-hotspot.hide {
-    opacity: 50%;
-    pointer-events: none;
+
+The login process is done, and we can focus on loading the product data. The product data
+returned by the endpoint has the same structure as the one in the `live-public` demo.
+
+<!-- embedme live-internal/main.js#L41-L43 -->
+```js
+const response = await request(`/products/${productUuid}`, "GET");
+const src = `${baseURL}/products/${productUuid}/download/model?clientUuid=${workspaceUuid}&conversionFormat=GLB`;
+const viewerConfig = JSON.parse(response.viewerSettings.config);
+```
+
+In order to download the model, the viewer will need to use authentication headers, which we 
+set on the `VntanaViewer` class.
+
+<!-- embedme live-internal/main.js#L45-L47 -->
+```js
+VntanaViewer.setModelRequestHeaders({
+  "X-AUTH-TOKEN": `Bearer ${token}`,
+});
+```
+It remains to pass viewer properties and model link to the viewer.
+
+<!-- embedme live-internal/main.js#L49-L53 -->
+```js
+const viewer = document.querySelector("vntana-viewer");
+Object.assign(viewer, viewerConfig);
+Object.assign(viewer, {
+  src,
+});
+```
+
+## Hotspots
+
+This example extends the `live-public` demo by fetching hotspot data from the Platform,
+creating hotspot elements, and appending them to the viewer. Each hotspot is represented by 
+a `<vntana-hotspot>` element, which marks a point on the 3D model that moves
+with the camera. 
+
+Main hotspot properties are:
+- `position`: defines where the hotspot is located in the scene.
+- `normal`: determines whether the hotspot is in front or behind the model, based on the camera
+position. When behind the model, hotspot elements automatically get the `hide` class added.
+
+These values are typically generated in the Platform's Editor,
+since they can be difficult to define manually. The Platform may additionally store the camera
+data that is applied when the hotspot is clicked.
+
+By default, `<vntana-hotspot>` elements don't have any content or styling applied; you can
+style them freely with CSS and add any HTML inside the element tags.
+
+Styles provided in `shared/styles/hotspots.css` make hotspot elements circular pins, and hide
+their content by default. The content is displayed only once the hotspot gets clicked, in which
+case we set the `open` class on the hotspot element.
+When positioned behind the model, hotspots are made transparent and interaction is disabled.
+
+**NOTE:** `<vntana-hotspot>` elements are not displayed until the model is loaded, so 
+they can be safely appended to the viewer at any time.
+
+The code in `main.js` begins with loading the product data, identical to the `live-public`
+demo, and then fetches hotspot data from the Platform. The hotspot endpoint returns paged results,
+so the request must include `page` and `size`. For simplicity, this demo assumes the number of 
+hotspots is less than 100.
+
+<!-- embedme hotspots/main.js#L29-L41 -->
+```js
+const hotspotEndpoint = `/hotspots/search/organizations/${organizationSlug}/clients/${workspaceSlug}`;
+const hotspotRequest = fetch(`${baseUrl}${hotspotEndpoint}`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    page: 1,
+    size: 100,
+    productUuid,
+  }),
+});
+const hotspots = await hotspotRequest.then(response => response.json());
+```
+
+Hotspot entries are found in the `hotspots.response.grid` array. Each entry has the shape:
+```json
+{
+  "config": {
+    "dimensions": "<stringified JSON>", // contains "position" and "normal"
+    "camera": "<stringified JSON>",     // optional camera settings
+  },
+  "text": "<HTML content string>",      // HTML content
+  "type": "TEXT",
 }
 ```
-We disable mouse interactions when `hide` is present, however this is not necessary.
 
-To actually add hotspots, we first need to retrieve their data. In the demo, this is just done by pulling from memory, however the method
-`requestHotspotData` on line 21 should be viewed as a placeholder for the method needed in your implementation to pull the data. This can be handled
-by requesting it from a database via methods such as HTTP calls, reading from a file, or pulling from memory. 
+Besides text, the Platform also supports image and video hotspots, though this demo 
+assumes that is not the case.
 
-On lines `24-27`, we will iterate over each hotspot returned and create their corresponding `vntana-hotspot` element, before appending to the 
-viewer. The expected hotspot data should have values for the `position` and `normal` for each needed hotspot, at a minimum. These values will be 
-`positions` consisting of three values and their units, such as `0m 0m 0m`. In addition to this info, you could also have:
-- `Camera Settings`: these can be utilized with an on-click event handler for the `vntana-hotspot` to update the camera to a specific place for hotspot.
-- `Details`: This is vague, but can be any content you can place as a child of the `vntana-hotspot`. In this demo, we just create a `div` to house some text.
-- `uuid`: It is recommended to generate `uuid`'s for your hotspots so you can sync them with your models and any pre-existing database entities intended to be displayed in the hotspot. This assumes you are not retrieving hotspots from the VNTANA Platform via the API.
+The next step is to create `<vntana-hotspot>` elements for each entry and append it to the
+viewer through the following steps: 
+1. Extract `position`, `normal`, and (optionally) `camera` data from the hotspot data.
+2. Create the element and set its position, normal, and content.
+3. Add a click handler that toggles the `open` class. If camera data is included, it is applied
+when the hotspot is opened.
 
-In `hotspots.js` the process of creating each individual hotspot occurs on lines `34-70`. First, on line `36` the `vntana-hotspot` element is created and the `position` and `normal` attributes are set. Then, on line `41` a `div` is created which will be house the information we wish to display when the hotspot is clicked, which will be appended to the `vntana-hotspot` as a child. A `p` element is created on line `46` housing the text for that hotspot and appended to the `div`. These steps are dependent on if and how you wish to hae extra info displayed when a hotspot is clicked. It can also be displayed on a side panel in which case you would not append these as children to the `vntana-hotspot`.
+<!-- embedme hotspots/main.js#L49-L72 -->
+```js
+hotspots.response.grid.forEach(data => {
+  const dimensions = JSON.parse(data.config.dimensions);
+  const camera = data.config.camera ? JSON.parse(data.config.camera) : null;
 
-Finally, we add some `click` listeners to the hotspot. On lines `51-55` we add a listener for when the hotspot is clicked which toggles the `hidden` class to show or display the intended info for the hotspot. Additionally, if the hotspot had `camera` data, we call the `moveCamera` method to update camera settings. On lines `57-67` we add `mousedown` and `mouseup` events to handle ensuring that when a hotspot's content is visible, and you click elsewhere, the hotspot panel is hidden once more, similar to the behavior on the VNTANA Platform.
+  const hotspot = document.createElement("vntana-hotspot");
+  hotspot.position = dimensions.position;
+  hotspot.normal = dimensions.normal;
+  hotspot.innerHTML = `<div class="content">${data.text}</div>`;
+
+  hotspot.addEventListener("click", event => {
+    if (event.target !== hotspot) {
+      return;
+    }
+
+    const isOpen = hotspot.classList.contains("open");
+    hotspot.classList.toggle("open");
+
+    if (camera && !isOpen) {
+      viewer.setCameraRotation(camera.cameraRotation)
+      viewer.setCameraDistance(camera.cameraDistance)
+      viewer.setCameraTarget(camera.cameraTarget)
+      viewer.setFieldOfView(camera.fieldOfView)
+      viewer.setOrthographicSize(camera.orthographicSize)
+    }
+```
+
+**NOTE:** Hotspot data doesn't have to come from the Platform. It can also be stored locally or
+in another database, as long as `position`, `normal`, content, and (optionally) camera data
+are provided.
